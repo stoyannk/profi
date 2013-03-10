@@ -9,6 +9,7 @@
 #include <comutil.h>
 #include <wbemidl.h>
 #include <wmistr.h>
+#include <comdef.h>
 
 #include <memory>
 #include <thread>
