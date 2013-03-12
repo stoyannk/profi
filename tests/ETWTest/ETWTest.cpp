@@ -19,6 +19,13 @@ struct default_release
 	}
 };
 
+struct free_variant
+{
+	void operator()(VARIANT* ptr) const {
+		VariantClear(ptr);
+	}
+};
+
 std::unique_ptr<IWbemClassObject, default_release<IWbemClassObject>> g_EventCategoryClass;
 
 bool ListThreads(DWORD procId, ThreadsVec& outThreads) {
@@ -144,7 +151,7 @@ bool GetEventClass()
 		std::unique_ptr<IWbemClassObject, default_release<IWbemClassObject>> cls(clsTmp);
 		
 		if(FAILED(hrqual)) {
-			std::cerr << "Next failed with " << hrqual << std::endl;
+			std::cerr << "Next category failed with " << hrqual << std::endl;
 			return false;
 		}
 
@@ -152,22 +159,85 @@ bool GetEventClass()
 		cls->GetQualifierSet(&qualTmp);
 		std::unique_ptr<IWbemQualifierSet, default_release<IWbemQualifierSet>> qualifiers(qualTmp);
 		if(qualifiers) {
-			VARIANT varGuid;
-			hrqual = qualifiers->Get(L"Guid", 0, &varGuid, nullptr);
+			std::unique_ptr<VARIANT, free_variant> varGuid(new VARIANT);
+			hrqual = qualifiers->Get(L"Guid", 0, varGuid.get(), nullptr);
 			if(FAILED(hrqual)) {
 				continue;
 			}
 
-			if(lstrcmpiW(varGuid.bstrVal, THREAD_V2_CLSID) == 0) {
+			if(lstrcmpiW(varGuid->bstrVal, THREAD_V2_CLSID) == 0) {
 				categoryClassObject.reset(cls.release());
 				break;
 			}
 		}
 	}
 
+	std::unique_ptr<VARIANT, free_variant> varClassName(new VARIANT);
 	// Get the class we are interested in from the category
+    hr = categoryClassObject->Get(L"__RELPATH", 0, varClassName.get(), nullptr, nullptr);
+	if(FAILED(hr)) {
+		std::cerr << "Unable to get relpath " << hr << std::endl;
+		return false;
+	}
 
-	return true;
+	hr = service->CreateClassEnum(varClassName->bstrVal, 
+        WBEM_FLAG_SHALLOW | WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_USE_AMENDED_QUALIFIERS,
+        NULL, &classesTmp);
+	classes.reset(classesTmp);
+	if(FAILED(hr)) {
+		std::cerr << "Unable to get classes for category " << hr << std::endl;
+		return false;
+	}
+
+	bool found = false;
+	std::unique_ptr<IWbemClassObject, default_release<IWbemClassObject>> cls;
+	while(S_OK == hr) {
+		ULONG cnt = 0;
+		IWbemClassObject* clsTmp = nullptr;
+		auto hrqual = classes->Next(WBEM_INFINITE, 1, &clsTmp, &cnt);
+		cls.reset(clsTmp);
+
+		if(FAILED(hrqual)) {
+			std::cerr << "Next class failed with " << hrqual << std::endl;
+			return false;
+		}
+
+		IWbemQualifierSet* qualTmp = nullptr;
+		cls->GetQualifierSet(&qualTmp);
+		std::unique_ptr<IWbemQualifierSet, default_release<IWbemQualifierSet>> qualifiers(qualTmp);
+
+		std::unique_ptr<VARIANT, free_variant> varEventType(new VARIANT);
+		qualifiers->Get(L"EventType", 0, varEventType.get(), nullptr);
+
+		if (varEventType->vt & VT_ARRAY) {
+            HRESULT hrSafe = S_OK;
+            int ClassEventType;
+            SAFEARRAY* pEventTypes = varEventType->parray;
+
+            for (LONG i=0; (ULONG)i < pEventTypes->rgsabound->cElements; i++) {
+                hrSafe = SafeArrayGetElement(pEventTypes, &i, &ClassEventType);
+
+                if (ClassEventType == CSWITCH_EVENT_TYPE) {
+                    found = true;
+                    break;  //for loop
+                }
+            }
+        } 
+		else {
+            if (varEventType->intVal == CSWITCH_EVENT_TYPE) {
+                found = true;
+            }
+        }
+		if (found) {
+            break;  //while loop
+        }
+	}
+
+	if(found) {
+		g_EventCategoryClass = std::move(cls);
+	}
+
+	return found;
 }
 
 int main(int argc, char* argv[])
