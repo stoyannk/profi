@@ -23,6 +23,7 @@ struct free_variant
 {
 	void operator()(VARIANT* ptr) const {
 		VariantClear(ptr);
+		delete ptr;
 	}
 };
 
