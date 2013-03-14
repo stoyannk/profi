@@ -62,6 +62,41 @@ bool ListThreads(DWORD procId, ThreadsVec& outThreads) {
 	return true;;
 }
 
+struct CSWitchEventData
+{
+	CSWitchEventData(char* ptr) {
+		FillData(ptr);
+	}
+
+	unsigned NewThreadId;
+	unsigned OldThreadId;
+	char  NewThreadPriority;
+	char  OldThreadPriority;
+	unsigned char PreviousCState;
+	char  SpareByte;
+	char  OldThreadWaitReason;
+	char  OldThreadWaitMode;
+	char  OldThreadState;
+	char  OldThreadWaitIdealProcessor;
+	unsigned NewThreadWaitTime;
+	unsigned Reserved;
+
+	void FillData(char* ptr) {
+		NewThreadId = *(unsigned*)ptr; ptr += sizeof(unsigned);
+		OldThreadId = *(unsigned*)ptr; ptr += sizeof(unsigned);
+		NewThreadPriority = *(char*)ptr; ptr += sizeof(char);
+		OldThreadPriority = *(char*)ptr; ptr += sizeof(char);
+		PreviousCState = *(unsigned char*)ptr; ptr += sizeof(unsigned char);
+		SpareByte = *(char*)ptr; ptr += sizeof(char);
+		OldThreadWaitReason = *(char*)ptr; ptr += sizeof(char);
+		OldThreadWaitMode = *(char*)ptr; ptr += sizeof(char);
+		OldThreadState = *(char*)ptr; ptr += sizeof(char);
+		OldThreadWaitIdealProcessor = *(char*)ptr; ptr += sizeof(char);
+		NewThreadWaitTime = *(unsigned*)ptr; ptr += sizeof(unsigned);
+		Reserved = *(unsigned*)ptr; ptr += sizeof(unsigned);
+	}
+};
+
 void WINAPI ProcessEvent(PEVENT_TRACE event) {
 	++g_EventsCount;
 
@@ -80,7 +115,13 @@ void WINAPI ProcessEvent(PEVENT_TRACE event) {
 		{
 			++g_CSwitchEventsCount;
 
+			CSWitchEventData evData((char*)event->MofData);
 
+			auto oldThread = std::find(g_Threads.cbegin(), g_Threads.cend(), evData.OldThreadId);
+			auto newThread = std::find(g_Threads.cbegin(), g_Threads.cend(), evData.NewThreadId);
+			if(oldThread != g_Threads.cend() || newThread != g_Threads.cend()) {
+				++g_ThisProcessThreadEvents;
+			}
 		}
 	}
 }
@@ -315,6 +356,7 @@ int main(int argc, char* argv[])
 	std::cout << "Events received: " << g_EventsCount << std::endl;
 	std::cout << "Thread events received: " << g_ThreadEventsCount << std::endl;
 	std::cout << "CSwitch events received: " << g_CSwitchEventsCount << std::endl;
+	std::cout << "Thread events for this process received: " << g_ThisProcessThreadEvents << std::endl;
 	
 	return 0;
 }
