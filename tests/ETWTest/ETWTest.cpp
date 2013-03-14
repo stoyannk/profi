@@ -8,6 +8,11 @@ unsigned g_ThreadEventsCount = 0;
 unsigned g_CSwitchEventsCount = 0;
 unsigned g_ThisProcessThreadEvents = 0;
 
+unsigned g_ThisProcessThreadsScheduled = 0;
+unsigned g_ThisProcessThreadsUnscheduled = 0;
+
+unsigned g_ThisProcessThreadsWaits = 0;
+
 static const wchar_t* THREAD_V2_CLSID(L"{3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c}");
 static const unsigned CSWITCH_EVENT_TYPE = 36;
 
@@ -121,6 +126,17 @@ void WINAPI ProcessEvent(PEVENT_TRACE event) {
 			auto newThread = std::find(g_Threads.cbegin(), g_Threads.cend(), evData.NewThreadId);
 			if(oldThread != g_Threads.cend() || newThread != g_Threads.cend()) {
 				++g_ThisProcessThreadEvents;
+
+				if(oldThread != g_Threads.cend()) {
+					++g_ThisProcessThreadsUnscheduled;
+
+					if(evData.OldThreadState == 5/*waiting*/) {
+						++g_ThisProcessThreadsWaits;
+					}
+				}
+				else {
+					++g_ThisProcessThreadsScheduled;
+				}
 			}
 		}
 	}
@@ -331,7 +347,7 @@ int main(int argc, char* argv[])
 	}
 	std::thread consumerThread(std::bind(&StartTraceConsume, consumeHandle));
 
-	::Sleep(1);
+	::Sleep(1000);
 
 	// Stop the session
 	properties->LoggerNameOffset = 0;
@@ -341,23 +357,27 @@ int main(int argc, char* argv[])
 		std::cerr << "Unable to stop trace; error: " << error << std::endl;
 	}
 
+	error = ::CloseTrace(consumeHandle);
+	if(error != ERROR_SUCCESS) {
+		std::cerr << "Unable to close consume trace; error: " << error << std::endl;
+	}
+
 	std::cout << "Free buffers: " << properties->FreeBuffers << std::endl;
 	std::cout << "Events lost: " << properties->EventsLost << std::endl;
 	std::cout << "Buffers written: " << properties->BuffersWritten << std::endl;
 	std::cout << "Log buffers lost: " << properties->LogBuffersLost << std::endl;
 	std::cout << "RealTime buffers lost: " << properties->RealTimeBuffersLost << std::endl;
 
-	error = ::CloseTrace(consumeHandle);
-	if(error != ERROR_SUCCESS) {
-		std::cerr << "Unable to close consume trace; error: " << error << std::endl;
-	}
-
 	consumerThread.join();
 	std::cout << "Events received: " << g_EventsCount << std::endl;
 	std::cout << "Thread events received: " << g_ThreadEventsCount << std::endl;
 	std::cout << "CSwitch events received: " << g_CSwitchEventsCount << std::endl;
 	std::cout << "Thread events for this process received: " << g_ThisProcessThreadEvents << std::endl;
-	
+	std::cout << "Scheduled thread events for this process received: " << g_ThisProcessThreadsScheduled << std::endl;
+	std::cout << "Unscheduled thread events for this process received: " << g_ThisProcessThreadsUnscheduled << std::endl;
+
+	std::cout << "Wait thread events for this process received: " << g_ThisProcessThreadsWaits << std::endl;
+		
 	return 0;
 }
 
