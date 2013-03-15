@@ -13,6 +13,9 @@ unsigned g_ThisProcessThreadsUnscheduled = 0;
 
 unsigned g_ThisProcessThreadsWaits = 0;
 
+unsigned long long g_LastUnscheduleTimeMs = 0;
+unsigned long long g_MaxUnscheduledTimeMs = 0;
+
 static const wchar_t* THREAD_V2_CLSID(L"{3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c}");
 static const unsigned CSWITCH_EVENT_TYPE = 36;
 
@@ -130,12 +133,19 @@ void WINAPI ProcessEvent(PEVENT_TRACE event) {
 				if(oldThread != g_Threads.cend()) {
 					++g_ThisProcessThreadsUnscheduled;
 
+					g_LastUnscheduleTimeMs = (event->Header.TimeStamp.QuadPart / 10000);
+
 					if(evData.OldThreadState == 5/*waiting*/) {
 						++g_ThisProcessThreadsWaits;
 					}
 				}
 				else {
 					++g_ThisProcessThreadsScheduled;
+					if(g_LastUnscheduleTimeMs) {
+						unsigned long long timeInNs = (event->Header.TimeStamp.QuadPart / 10000);
+						g_MaxUnscheduledTimeMs = std::max(timeInNs - g_LastUnscheduleTimeMs, g_MaxUnscheduledTimeMs);
+						g_LastUnscheduleTimeMs = 0;
+					}
 				}
 			}
 		}
@@ -340,18 +350,21 @@ int main(int argc, char* argv[])
 	properties->LogFileNameOffset = 0;
 	properties->LoggerNameOffset = sizeof(EVENT_TRACE_PROPERTIES);
 
+	typedef std::chrono::high_resolution_clock h_clock;
 	TRACEHANDLE session;
 	auto error = ::StartTrace(&session, KERNEL_LOGGER_NAME, properties);
+	const h_clock::time_point startTime = h_clock::now();
 	if(error != ERROR_SUCCESS) {
 		std::cerr << "Unable to start trace; error: " << error << std::endl;
 	}
 	std::thread consumerThread(std::bind(&StartTraceConsume, consumeHandle));
 
-	::Sleep(1000);
-
+	::Sleep(2570);
+		
 	// Stop the session
 	properties->LoggerNameOffset = 0;
 	error = ::ControlTrace(session, KERNEL_LOGGER_NAME, properties, EVENT_TRACE_CONTROL_STOP);
+	const h_clock::time_point endTime = h_clock::now();
 
 	if(error != ERROR_SUCCESS) {
 		std::cerr << "Unable to stop trace; error: " << error << std::endl;
@@ -361,7 +374,7 @@ int main(int argc, char* argv[])
 	if(error != ERROR_SUCCESS) {
 		std::cerr << "Unable to close consume trace; error: " << error << std::endl;
 	}
-
+												   
 	std::cout << "Free buffers: " << properties->FreeBuffers << std::endl;
 	std::cout << "Events lost: " << properties->EventsLost << std::endl;
 	std::cout << "Buffers written: " << properties->BuffersWritten << std::endl;
@@ -377,7 +390,11 @@ int main(int argc, char* argv[])
 	std::cout << "Unscheduled thread events for this process received: " << g_ThisProcessThreadsUnscheduled << std::endl;
 
 	std::cout << "Wait thread events for this process received: " << g_ThisProcessThreadsWaits << std::endl;
-		
+
+	std::cout << "Max unscheduled time for main thread (ms) : " << g_MaxUnscheduledTimeMs<< std::endl;
+
+	std::cout << "Total trace duration (ms) : " << std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() << std::endl;
+
 	return 0;
 }
 

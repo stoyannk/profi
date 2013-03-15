@@ -2,6 +2,7 @@
 
 #define WIN32_LEAN_AND_MEAD
 #define INITGUID
+#define NOMINMAX
 #include <Windows.h>
 #include <evntrace.h>
 #include <Evntcons.h>
@@ -15,5 +16,6 @@
 #include <thread>
 #include <vector>
 #include <algorithm>
+#include <chrono>
 
 #include <iostream>
