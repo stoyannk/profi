@@ -13,8 +13,10 @@ unsigned g_ThisProcessThreadsUnscheduled = 0;
 
 unsigned g_ThisProcessThreadsWaits = 0;
 
-unsigned long long g_LastUnscheduleTimeMs = 0;
-unsigned long long g_MaxUnscheduledTimeMs = 0;
+unsigned long long g_LastUnscheduleTime = 0;
+unsigned long long g_MaxUnscheduledTime = 0;
+
+unsigned long long g_PerfFrequency = 0;
 
 static const wchar_t* THREAD_V2_CLSID(L"{3d6fa8d1-fe05-11d0-9dda-00c04fd7ba7c}");
 static const unsigned CSWITCH_EVENT_TYPE = 36;
@@ -133,7 +135,7 @@ void WINAPI ProcessEvent(PEVENT_TRACE event) {
 				if(oldThread != g_Threads.cend()) {
 					++g_ThisProcessThreadsUnscheduled;
 
-					g_LastUnscheduleTimeMs = (event->Header.TimeStamp.QuadPart / 10000);
+					g_LastUnscheduleTime = (event->Header.TimeStamp.QuadPart);
 
 					if(evData.OldThreadState == 5/*waiting*/) {
 						++g_ThisProcessThreadsWaits;
@@ -141,10 +143,10 @@ void WINAPI ProcessEvent(PEVENT_TRACE event) {
 				}
 				else {
 					++g_ThisProcessThreadsScheduled;
-					if(g_LastUnscheduleTimeMs) {
-						unsigned long long timeInNs = (event->Header.TimeStamp.QuadPart / 10000);
-						g_MaxUnscheduledTimeMs = std::max(timeInNs - g_LastUnscheduleTimeMs, g_MaxUnscheduledTimeMs);
-						g_LastUnscheduleTimeMs = 0;
+					if(g_LastUnscheduleTime) {
+						unsigned long long time = (event->Header.TimeStamp.QuadPart);
+						g_MaxUnscheduledTime = std::max(time - g_LastUnscheduleTime, g_MaxUnscheduledTime);
+						g_LastUnscheduleTime = 0;
 					}
 				}
 			}
@@ -310,6 +312,10 @@ bool GetEventClass()
 
 int main(int argc, char* argv[])
 {
+	LARGE_INTEGER li;
+	::QueryPerformanceFrequency(&li);
+	g_PerfFrequency = li.QuadPart;
+
 	if(!ListThreads(GetCurrentProcessId(), g_Threads)) {
 		return 1;
 	}
@@ -327,7 +333,7 @@ int main(int argc, char* argv[])
 	// Open the trace
 	EVENT_TRACE_LOGFILE logDesc = {0};
 	logDesc.LoggerName = KERNEL_LOGGER_NAME;
-	logDesc.ProcessTraceMode = PROCESS_TRACE_MODE_REAL_TIME;
+	logDesc.ProcessTraceMode = PROCESS_TRACE_MODE_REAL_TIME | PROCESS_TRACE_MODE_RAW_TIMESTAMP;
 	logDesc.EventCallback = &ProcessEvent;
 
 	TRACEHANDLE consumeHandle = ::OpenTrace(&logDesc);
@@ -391,7 +397,7 @@ int main(int argc, char* argv[])
 
 	std::cout << "Wait thread events for this process received: " << g_ThisProcessThreadsWaits << std::endl;
 
-	std::cout << "Max unscheduled time for main thread (ms) : " << g_MaxUnscheduledTimeMs<< std::endl;
+	std::cout << "Max unscheduled time for main thread (s) : " << g_MaxUnscheduledTime / (double)g_PerfFrequency << std::endl;
 
 	std::cout << "Total trace duration (ms) : " << std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count() << std::endl;
 
