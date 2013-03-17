@@ -365,7 +365,7 @@ int main(int argc, char* argv[])
 	}
 	std::thread consumerThread(std::bind(&StartTraceConsume, consumeHandle));
 
-	::Sleep(2570);
+	::Sleep(1270);
 		
 	// Stop the session
 	properties->LoggerNameOffset = 0;
