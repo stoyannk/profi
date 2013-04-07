@@ -17,6 +17,12 @@ void DefaultAllocator::Deallocate(void* ptr) {
 	free(ptr);
 }
 
+DefaultAllocator::DefaultAllocator()
+{}
+
+DefaultAllocator::~DefaultAllocator()
+{}
+  
 void Registry::Initialize(IAllocator* allocator) {
 	auto instance = static_cast<Registry*>(allocator->Allocate(sizeof(Registry)));
 	auto ex = make_scope_exit([instance, allocator] {
@@ -42,5 +48,12 @@ Registry::~Registry() {
 
 }
 
+void Initialize(IAllocator* allocator) {
+	Registry::Initialize(allocator);
+}
+
+void Deinitialize() {
+	Registry::Deinitialize();
+}
 
 }

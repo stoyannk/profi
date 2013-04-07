@@ -1,15 +1,23 @@
 ﻿#pragma once
-
-#define PROFI_ENABLE
+#include <profi_decls.h>
 
 #ifdef PROFI_ENABLE
+	#include <IAllocator.h>
+	#include <LocalProfileScope.h>
+	
+	#ifdef _MSC_VER
+	#define __PRETTY_FUNCTION__ __FUNCSIG__
+	#endif
+	
+	#define PROFI_FUNC profi::LocalProfileScope lps_##__LINE__##(__PRETTY_FUNCTION__);
 
-#include <LocalProfileScope.h>
-
-#define PROFI_FUNC profi::LocalProfileScope lps_##__LINE__##(__FUNCTION__);
+	namespace profi {
+		void Initialize(IAllocator* allocator);
+		void Deinitialize();
+	}
 
 #else
 
-#define PROFI_FUNC
+	#define PROFI_FUNC
 
 #endif

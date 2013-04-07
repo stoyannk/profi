@@ -2,6 +2,9 @@
 
 int main()
 {
-	profi::Registry::Initialize();
+	profi::DefaultAllocator allocator;
+	profi::Initialize(&allocator);
 	PROFI_FUNC
+
+	profi::Deinitialize();
 }

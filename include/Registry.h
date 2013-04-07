@@ -5,11 +5,6 @@
 
 namespace profi {
 
-class DefaultAllocator : public IAllocator, boost::noncopyable {
-	virtual void* Allocate(size_t size) PROFI_OVERRIDE;
-	virtual void Deallocate(void* ptr) PROFI_OVERRIDE;
-};
-
 class Registry : boost::noncopyable {
 public:
 	static void Initialize(IAllocator* allocator);
