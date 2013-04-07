@@ -2,9 +2,9 @@
 
 namespace profi {
 
-class LocalProfileScope {
+class ProfileScope {
 public:
-	LocalProfileScope();
+	ProfileScope();
 	
 private:
 

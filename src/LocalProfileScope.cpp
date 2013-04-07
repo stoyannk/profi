@@ -4,7 +4,10 @@
 
 namespace profi {
 
-LocalProfileScope::LocalProfileScope()
+LocalProfileScope::LocalProfileScope(const char* name)
 {}
 
+LocalProfileScope::~LocalProfileScope()
+{}
+  
 }

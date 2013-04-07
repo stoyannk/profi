@@ -15,6 +15,10 @@ project 'simple'
 	
 	flags { 'NoRTTI', 'EnableSSE2' }
 
+	includedirs { '../../include/' }
+	links { 'profi.lib' }
+	libdirs { "../../bin/" }
+	
 	configuration "Debug"
          defines { "DEBUG" }
          flags { "Symbols" }

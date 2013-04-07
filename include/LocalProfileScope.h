@@ -2,9 +2,10 @@
 
 namespace profi {
 
-class ProfileScope {
+class LocalProfileScope {
 public:
-	ProfileScope();
+	LocalProfileScope(const char* name);
+	~LocalProfileScope();
 	
 private:
 

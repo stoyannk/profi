@@ -4,7 +4,9 @@
 
 #ifdef PROFI_ENABLE
 
-#define PROFI_FUNC 
+#include <LocalProfileScope.h>
+
+#define PROFI_FUNC profi::LocalProfileScope lps_##__LINE__##(__FUNCTION__);
 
 #else
 
