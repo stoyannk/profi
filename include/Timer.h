@@ -2,16 +2,17 @@
 
 namespace profi {
 
-class Timer {
+class Timer : boost::noncopyable {
 public:
-	static void Initialize();
-	static unsigned long long Now();
-private:
-	static unsigned long long s_Frequency;
-
 	Timer();
-	Timer(const Timer&);
-	Timer& operator=(const Timer&);
+	unsigned long long Now();
+
+	static unsigned GetBaseLine();
+
+private:
+	unsigned long long m_Frequency;
+
+	static unsigned s_BaseLine;
 };
 
 }
