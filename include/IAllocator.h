@@ -4,6 +4,7 @@
 
 namespace profi {
 
+// Must provide thread-safe allocation
 class IAllocator {
 public:
 	virtual void* Allocate(size_t size) = 0;

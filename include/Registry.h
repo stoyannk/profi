@@ -2,6 +2,7 @@
 #include <profi_decls.h>
 
 #include <IAllocator.h>
+#include <GlobalAllocator.h>
 
 namespace profi {
 
@@ -33,7 +34,7 @@ struct profi_deleter
 {
 	void operator()(T* ptr) {
 		ptr->~T();
-		Registry::Get()->GetAllocator()->Deallocate(ptr);
+		GetGlobalAllocator()->Deallocate(ptr);
 	}
 };
 

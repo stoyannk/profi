@@ -9,6 +9,11 @@ namespace profi {
 
 Registry* Registry::s_Instance = nullptr;
 
+IAllocator* GetGlobalAllocator()
+{
+	return Registry::Get()->GetAllocator();
+}
+
 void* DefaultAllocator::Allocate(size_t size) {
 	return malloc(size);
 }

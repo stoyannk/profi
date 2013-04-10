@@ -2,6 +2,7 @@
 
 #include <Registry.h>
 #include <ProfileScope.h>
+#include <Timer.h>
 
 namespace profi {
 
@@ -11,6 +12,7 @@ public:
 	
 private:
 	ProfileScope* m_ActiveScope;
+	Timer m_Timer;
 };
 
 }
