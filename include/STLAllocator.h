@@ -125,4 +125,13 @@ bool operator!=(const STLAllocator<T>& lhs, const STLAllocator<T>& rhs)
 	return !(lhs == rhs);
 }
 
+template<typename T>
+struct profi_deleter 
+{
+	void operator()(T* ptr) {
+		ptr->~T();
+		GetGlobalAllocator()->Deallocate(ptr);
+	}
+};
+
 }

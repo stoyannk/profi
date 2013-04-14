@@ -4,10 +4,10 @@ namespace profi {
 
 class ProfileScope {
 public:
-	ProfileScope();
+	ProfileScope(const char* name);
 	
 private:
-
+	const char* m_Name;
 };
 
 }

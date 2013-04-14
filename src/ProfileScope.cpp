@@ -4,7 +4,8 @@
 
 namespace profi {
 
-ProfileScope::ProfileScope()
+ProfileScope::ProfileScope(const char* name)
+	: m_Name(name)
 {}
 
 }

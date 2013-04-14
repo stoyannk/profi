@@ -29,13 +29,5 @@ private:
 	IAllocator* m_Allocator;
 };
 
-template<typename T>
-struct profi_deleter 
-{
-	void operator()(T* ptr) {
-		ptr->~T();
-		GetGlobalAllocator()->Deallocate(ptr);
-	}
-};
 
 }

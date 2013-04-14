@@ -7,5 +7,6 @@
 #endif
 
 #include <memory>
+#include <functional>
 
 #include <boost/noncopyable.hpp>
