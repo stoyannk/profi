@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <ProfileThread.h>
+
 namespace profi {
 
 class LocalProfileScope {
@@ -8,7 +10,7 @@ public:
 	~LocalProfileScope();
 	
 private:
-
+	unsigned long long m_StartTime;
 };
 
 }

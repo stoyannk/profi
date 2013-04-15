@@ -23,4 +23,6 @@ private:
 	DefaultAllocator& operator=(const DefaultAllocator&);
 };
 
+//TODO: Implement another better high-perf(per-thread) allocator
+
 }

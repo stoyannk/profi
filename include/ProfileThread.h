@@ -9,9 +9,10 @@ namespace profi {
 class ProfileThread : boost::noncopyable {
 public:
 	ProfileThread();
+	~ProfileThread();
 	
 	void EnterScope(const char* name);
-	void ExitScope();
+	void ExitScope(unsigned long long elapsedTime);
 
 private:
 	ProfileScope* m_ActiveScope;

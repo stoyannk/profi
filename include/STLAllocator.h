@@ -2,6 +2,15 @@
 
 #include <GlobalAllocator.h>
 
+#define profi_new(TYPE, ...) new (GetGlobalAllocator()->Allocate(sizeof(TYPE))) TYPE(__VA_ARGS__)
+
+template<typename T>
+void profi_delete(T* ptr)
+{
+	ptr->~T();
+	GetGlobalAllocator()->Deallocate(ptr);
+}
+
 namespace profi {
 
 template <typename T>

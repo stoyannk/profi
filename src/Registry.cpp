@@ -2,6 +2,7 @@
 
 #include <Registry.h>
 #include <ScopeExit.h>
+#include <ProfileThread.h>
 
 #include <stdlib.h>
 
@@ -51,6 +52,20 @@ Registry::Registry(IAllocator* allocator)
 
 Registry::~Registry() {
 
+}
+
+ProfileThread* Registry::GetOrRegisterThreadProfile() {
+	auto tlsProfile = m_TLSProfiles.get();
+
+	if(!tlsProfile) {
+		tlsProfile = profi_new(ProfileThread);
+		m_TLSProfiles.reset(tlsProfile);
+
+		boost::unique_lock<boost::mutex> lock(m_ThreadsMutex);
+		m_ProfiledThreads.push_back(tlsProfile);
+	}
+
+	return tlsProfile;
 }
 
 void Initialize(IAllocator* allocator) {

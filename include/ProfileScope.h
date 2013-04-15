@@ -1,13 +1,26 @@
 ﻿#pragma once
 
+#include <HashMap.h>
+
 namespace profi {
 
-class ProfileScope {
+class ProfileScope : boost::noncopyable {
 public:
-	ProfileScope(const char* name);
+	ProfileScope(); // for hash map
+
+	explicit ProfileScope(const char* name);
+	~ProfileScope();
+
+	HashMap& Children();
+
+	void IncreaseTime(unsigned long long time);
+	unsigned long long GetTime() const;
 	
 private:
 	const char* m_Name;
+	unsigned long long m_TotalTime;
+
+	HashMap m_ChildProfiles;
 };
 
 }

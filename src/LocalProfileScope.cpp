@@ -5,6 +5,7 @@
 namespace profi {
 
 LocalProfileScope::LocalProfileScope(const char* name)
+	: m_StartTime(0)
 {}
 
 LocalProfileScope::~LocalProfileScope()
