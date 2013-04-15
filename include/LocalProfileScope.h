@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include <ProfileThread.h>
-
 namespace profi {
 
 class LocalProfileScope {
