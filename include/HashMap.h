@@ -11,13 +11,14 @@ class ProfileScope;
 
 class HashMap : boost::noncopyable
 {
+public:
 	ProfileScope* Get(const char* name);
 	bool Insert(const char* name, ProfileScope* scope);
 	
 private:
 	//TODO: This is an experimental implementation with a normal hash map + lock; Provide custom high-perf impl
 	std::unordered_map<const char*, ProfileScope*> m_InternalMap;
-	boost::mutex m_Mutex;
+	std::mutex m_Mutex;
 };
 
 }

@@ -3,7 +3,7 @@
 #include <Timer.h>
 #include <profi_decls.h>
 
-#define UNKNOWN_BASELINE 0xFFFFFFFFFFFFFFFF
+#define UNKNOWN_BASELINE 0xFFFFFFFF
 
 namespace profi {
 
@@ -20,7 +20,7 @@ namespace profi {
 #endif
 	}
 
-	unsigned long long Timer::Now()
+	unsigned long long Timer::Now() const
 	{
 #if PROFI_TIMING_METHOD == PROFI_TIMER_QPC
 		LARGE_INTEGER now;

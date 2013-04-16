@@ -18,7 +18,7 @@ public:
 	}
 
 	IAllocator* GetAllocator() const {
-		return m_Allocator;
+		return s_Allocator;
 	}
 
 	ProfileThread* GetOrRegisterThreadProfile();
@@ -29,14 +29,14 @@ private:
 	Registry(IAllocator* allocator);
 	~Registry();
 
-	boost::mutex m_ThreadsMutex;
+	std::mutex m_ThreadsMutex;
 	typedef std::vector<ProfileThread*, STLAllocator<ProfileThread*>> ProfileThreadsVec;
 	ProfileThreadsVec m_ProfiledThreads;
 
 	boost::thread_specific_ptr<ProfileThread> m_TLSProfiles;
 
 private:
-	IAllocator* m_Allocator;
+	static IAllocator* s_Allocator;
 };
 
 

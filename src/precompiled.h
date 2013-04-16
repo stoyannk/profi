@@ -9,7 +9,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <mutex>
 
 #include <boost/noncopyable.hpp>
-#include <boost/thread/mutex.hpp>
 #include <boost/thread/tss.hpp>

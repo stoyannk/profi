@@ -4,7 +4,8 @@ int main()
 {
 	profi::DefaultAllocator allocator;
 	profi::Initialize(&allocator);
-	PROFI_FUNC
-
+	{
+		PROFI_FUNC
+	}
 	profi::Deinitialize();
 }

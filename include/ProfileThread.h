@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <Registry.h>
 #include <HashMap.h>
 #include <Timer.h>
 
@@ -12,7 +11,10 @@ public:
 	~ProfileThread();
 	
 	void EnterScope(const char* name);
-	void ExitScope(unsigned long long elapsedTime);
+	void ExitScope(unsigned long long elapsedTime, ProfileScope* parentScope);
+
+	const Timer& GetTimer() const { return m_Timer; }
+	ProfileScope* GetActiveScope() const { return m_ActiveScope; }
 
 private:
 	ProfileScope* m_ActiveScope;

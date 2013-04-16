@@ -5,7 +5,7 @@ namespace profi {
 class Timer : boost::noncopyable {
 public:
 	Timer();
-	unsigned long long Now();
+	unsigned long long Now() const;
 
 	static unsigned GetBaseLine();
 

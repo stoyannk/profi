@@ -9,6 +9,7 @@
 namespace profi {
 
 Registry* Registry::s_Instance = nullptr;
+IAllocator* Registry::s_Allocator = nullptr;
 
 IAllocator* GetGlobalAllocator()
 {
@@ -30,9 +31,11 @@ DefaultAllocator::~DefaultAllocator()
 {}
   
 void Registry::Initialize(IAllocator* allocator) {
+	Registry::s_Allocator = allocator;
 	auto instance = static_cast<Registry*>(allocator->Allocate(sizeof(Registry)));
 	auto ex = make_scope_exit([instance, allocator] {
 		allocator->Deallocate(instance);
+		Registry::s_Allocator = nullptr;
 	});
 	new(instance) Registry(allocator);
 	ex.dismiss();
@@ -42,13 +45,12 @@ void Registry::Initialize(IAllocator* allocator) {
 
 void Registry::Deinitialize() {
 	s_Instance->~Registry();
-	s_Instance->m_Allocator->Deallocate(s_Instance);
+	s_Instance->s_Allocator->Deallocate(s_Instance);
 	s_Instance = nullptr;
 }
 
 Registry::Registry(IAllocator* allocator)
-	: m_Allocator(allocator) {
-}
+{}
 
 Registry::~Registry() {
 
@@ -61,7 +63,7 @@ ProfileThread* Registry::GetOrRegisterThreadProfile() {
 		tlsProfile = profi_new(ProfileThread);
 		m_TLSProfiles.reset(tlsProfile);
 
-		boost::unique_lock<boost::mutex> lock(m_ThreadsMutex);
+		std::unique_lock<std::mutex> lock(m_ThreadsMutex);
 		m_ProfiledThreads.push_back(tlsProfile);
 	}
 

@@ -2,7 +2,9 @@ project 'simple'
 	kind 'ConsoleApp'
 	language 'C++'
 	uuid '45344FDF-9294-4EB1-B6ED-004C7C72C3E8'
-					
+
+	dofile '../../src/third_party.lua'	
+	
 	files { '**.h', '**.cpp' }
 
 	pchheader(path.getabsolute('./precompiled.h'))
