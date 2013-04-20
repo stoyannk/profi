@@ -10,6 +10,7 @@
 #include <memory>
 #include <functional>
 #include <mutex>
+#include <sstream>
 
 #include <boost/noncopyable.hpp>
 #include <boost/thread/tss.hpp>

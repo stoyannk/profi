@@ -2,7 +2,9 @@
 
 #include <GlobalAllocator.h>
 
-#define profi_new(TYPE, ...) new (GetGlobalAllocator()->Allocate(sizeof(TYPE))) TYPE(__VA_ARGS__)
+#define profi_new(TYPE, ...) new (profi::GetGlobalAllocator()->Allocate(sizeof(TYPE))) TYPE(__VA_ARGS__)
+
+namespace profi {
 
 template<typename T>
 void profi_delete(T* ptr)
@@ -10,8 +12,6 @@ void profi_delete(T* ptr)
 	ptr->~T();
 	GetGlobalAllocator()->Deallocate(ptr);
 }
-
-namespace profi {
 
 template <typename T>
 class STLAllocator
@@ -142,5 +142,8 @@ struct profi_deleter
 		GetGlobalAllocator()->Deallocate(ptr);
 	}
 };
+
+typedef std::basic_string<char, std::char_traits<char>, STLAllocator<char>> pstring;
+typedef std::basic_ostringstream<char, std::char_traits<char>, STLAllocator<char>> opstringstream;
 
 }

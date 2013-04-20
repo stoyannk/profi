@@ -3,6 +3,7 @@
 
 #include <IAllocator.h>
 #include <STLAllocator.h>
+#include <Reports.h>
 
 namespace profi {
 
@@ -23,6 +24,8 @@ public:
 
 	ProfileThread* GetOrRegisterThreadProfile();
 	
+	IReport* DumpDataJSON();
+	
 private:
 	static Registry* s_Instance;
 
@@ -34,6 +37,28 @@ private:
 	ProfileThreadsVec m_ProfiledThreads;
 
 	boost::thread_specific_ptr<ProfileThread> m_TLSProfiles;
+
+private:
+	class JSONReport : public IReport
+	{
+	public:
+		JSONReport();
+
+		virtual ~JSONReport();
+		virtual const void* Data() override;
+		virtual unsigned Size() override;
+	
+		virtual void Release() override;
+
+		pstring& GetString();
+
+	private:
+		pstring m_Data;
+
+	private:
+		JSONReport(const JSONReport&);
+		JSONReport& operator=(const JSONReport&);
+	};
 
 private:
 	static IAllocator* s_Allocator;

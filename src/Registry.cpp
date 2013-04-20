@@ -63,19 +63,73 @@ ProfileThread* Registry::GetOrRegisterThreadProfile() {
 		tlsProfile = profi_new(ProfileThread);
 		m_TLSProfiles.reset(tlsProfile);
 
-		std::unique_lock<std::mutex> lock(m_ThreadsMutex);
+		std::lock_guard<std::mutex> lock(m_ThreadsMutex);
 		m_ProfiledThreads.push_back(tlsProfile);
 	}
 
 	return tlsProfile;
 }
 
+IReport* Registry::DumpDataJSON()
+{
+	ProfileThreadsVec allThreads;
+	{
+		std::lock_guard<std::mutex> lock(m_ThreadsMutex);
+		allThreads = m_ProfiledThreads;
+	}
+
+	unsigned threadId = 0;
+	opstringstream ostream;
+	for(auto threadIt = allThreads.cbegin(); threadIt != allThreads.cend(); ++threadIt) {
+		ostream << "\"Thread" << threadId << "\": {" << std::endl;
+		 
+		ostream << "}" << std::endl;
+		++threadId;
+	}
+
+	std::unique_ptr<JSONReport, profi_deleter<JSONReport>> report(profi_new(JSONReport));
+
+	report->GetString() = ostream.str();
+
+	return report.release();
+}
+
+Registry::JSONReport::JSONReport()
+{}
+
+Registry::JSONReport::~JSONReport()
+{}
+
+void Registry::JSONReport::Release()
+{
+	profi_delete(this);
+}
+
+const void* Registry::JSONReport::Data()
+{
+	return m_Data.c_str();
+}
+
+unsigned Registry::JSONReport::Size()
+{
+	return m_Data.size();
+}
+
+pstring& Registry::JSONReport::GetString()
+{
+	return m_Data;
+}
+ 
 void Initialize(IAllocator* allocator) {
 	Registry::Initialize(allocator);
 }
 
 void Deinitialize() {
 	Registry::Deinitialize();
+}
+
+IReport* GetReportJSON() {
+	return Registry::Get()->DumpDataJSON();
 }
 
 }
