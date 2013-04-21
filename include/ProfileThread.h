@@ -16,6 +16,8 @@ public:
 	const Timer& GetTimer() const { return m_Timer; }
 	ProfileScope* GetActiveScope() const { return m_ActiveScope; }
 
+	const HashMap& GetScopes() const { return m_Scopes; };
+
 private:
 	ProfileScope* m_ActiveScope;
 	Timer m_Timer;

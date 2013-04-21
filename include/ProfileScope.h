@@ -16,6 +16,8 @@ public:
 	void IncreaseTime(unsigned long long time);
 	unsigned long long GetTime() const;
 	
+	const char* GetName() const { return m_Name; }
+
 private:
 	const char* m_Name;
 	unsigned long long m_TotalTime;

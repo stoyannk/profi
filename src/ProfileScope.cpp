@@ -11,6 +11,7 @@ ProfileScope::ProfileScope()
 
 ProfileScope::ProfileScope(const char* name)
 	: m_Name(name)
+	, m_TotalTime(0)
 {}
 
 ProfileScope::~ProfileScope()
@@ -30,6 +31,5 @@ unsigned long long ProfileScope::GetTime() const
 {
 	return m_TotalTime;
 }
-	
 
 }

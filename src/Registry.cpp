@@ -3,6 +3,7 @@
 #include <Registry.h>
 #include <ScopeExit.h>
 #include <ProfileThread.h>
+#include <ProfileScope.h>
 
 #include <stdlib.h>
 
@@ -70,6 +71,34 @@ ProfileThread* Registry::GetOrRegisterThreadProfile() {
 	return tlsProfile;
 }
 
+struct indent {
+	indent() : Level(0) {}
+	unsigned Level;
+};
+
+struct indent_scope {
+public:
+	static const unsigned DEFAULT_INDENT = 2;
+	explicit indent_scope(indent& in)
+		: m_Indent(in)
+	{
+		m_Indent.Level += DEFAULT_INDENT;
+	}
+	~indent_scope() {
+		m_Indent.Level -= DEFAULT_INDENT;
+	}
+
+private:
+	indent& m_Indent;
+};
+
+std::ostream& operator<<(std::ostream& stream, const indent& val) {
+    for(unsigned i = 0; i < val.Level; i++) {
+        stream << " ";
+    }
+    return stream;
+}
+
 IReport* Registry::DumpDataJSON()
 {
 	ProfileThreadsVec allThreads;
@@ -78,12 +107,39 @@ IReport* Registry::DumpDataJSON()
 		allThreads = m_ProfiledThreads;
 	}
 
+	std::function<void (indent, ProfileScope*, opstringstream&)> dumpScope = [&] (indent in, ProfileScope* scope, opstringstream& output) {
+		indent_scope insc(in);
+
+		output << in << "\"" << scope->GetName() << "\": {" << std::endl;
+		{
+			indent_scope insc(in);
+			output << in << "\"Time\": " << scope->GetTime() /* not sync */ << "," << std::endl;
+			HashMap childrenCopy = scope->Children();
+			if(childrenCopy.size()) {
+				output << in << "\"Children\": { " << std::endl;
+				{
+					for(auto scopeIt = childrenCopy.cbegin(); scopeIt != childrenCopy.cend(); ++scopeIt) {
+						dumpScope(in, scopeIt->second, output);
+					}
+				}
+				output << in << "}, " << std::endl;
+			}
+		}
+		output << in << "}," << std::endl;
+	};
+
 	unsigned threadId = 0;
 	opstringstream ostream;
+	indent in;
 	for(auto threadIt = allThreads.cbegin(); threadIt != allThreads.cend(); ++threadIt) {
 		ostream << "\"Thread" << threadId << "\": {" << std::endl;
-		 
-		ostream << "}" << std::endl;
+		
+		const auto& scopes = (*threadIt)->GetScopes();
+		for(auto scopeIt = scopes.cbegin(); scopeIt != scopes.cend(); ++scopeIt) {
+			dumpScope(in, scopeIt->second, ostream);
+		}
+
+		ostream << "}," << std::endl;
 		++threadId;
 	}
 

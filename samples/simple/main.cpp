@@ -3,6 +3,7 @@
 
 void foo() {
 	PROFI_FUNC
+	
 }
 
 int main()
