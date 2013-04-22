@@ -11,6 +11,7 @@
 	#endif
 	
 	#define PROFI_FUNC profi::LocalProfileScope lps_##__LINE__##(__PRETTY_FUNCTION__);
+	#define PROFI_SCOPE(NAME) profi::LocalProfileScope lpss_##__LINE__##(NAME);
 	
 	namespace profi {
 		void Initialize(IAllocator* allocator);

@@ -1,9 +1,26 @@
 ﻿#include "precompiled.h"
 #include <fstream>
 
+#define SIMULATE_WORK
+#ifdef SIMULATE_WORK
+	#define SIMUL_SLEEP(TIME) std::this_thread::sleep_for(std::chrono::milliseconds(TIME));
+#else
+	#define SIMUL_SLEEP(TIME)
+#endif
+
 void foo() {
 	PROFI_FUNC
-	
+	SIMUL_SLEEP(1000)
+}
+
+void recurse(unsigned times)
+{
+	PROFI_FUNC
+	SIMUL_SLEEP(500)
+
+	if(times == 0)
+		return;
+	recurse(--times);
 }
 
 int main()
@@ -12,7 +29,12 @@ int main()
 	profi::Initialize(&allocator);
 	{
 		PROFI_FUNC
-		foo();
+		{
+			PROFI_SCOPE("TestScope")
+			foo();
+
+			recurse(3);
+		}
 	}
 
 	// dump the report
