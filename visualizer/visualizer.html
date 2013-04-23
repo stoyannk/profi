@@ -1,0 +1,44 @@
+<html>
+<head>
+    <title>Profi visualizer</title>
+    
+    <script type="text/javascript" src="js/jstree/_lib/jquery.js"></script>
+	<script type="text/javascript" src="js/jstree/jquery.jstree.js"></script>
+	
+	<script type="text/javascript">
+	
+	function init() {
+		//read json
+		$.getJSON("output.json", function(data) {
+			console.log(data);
+			// data is a JavaScript object now. Handle it as such
+		});
+	
+		$("#callTree").jstree({ 
+		"json_data" : {
+			"data" : [
+				{ 
+					"data" : "A node", 
+					"metadata" : { id : 23 },
+					"children" : [ "Child 1", "A Child 2" ]
+				},
+				{ 
+					"attr" : { "id" : "li.node.id1" }, 
+					"data" : { 
+						"title" : "Long format demo", 
+						"attr" : { "href" : "#" } 
+					} 
+				}
+			]
+		},
+		"plugins" : [ "themes", "json_data", "ui" ]
+		});
+	}
+	
+	window.addEventListener('load', init, false);
+	</script>
+</head>
+<body>
+	<div id="callTree"></div>
+</body>
+</html>

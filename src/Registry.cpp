@@ -110,19 +110,20 @@ IReport* Registry::DumpDataJSON()
 	std::function<void (indent, ProfileScope*, opstringstream&)> dumpScope = [&] (indent in, ProfileScope* scope, opstringstream& output) {
 		indent_scope insc(in);
 
-		output << in << "\"" << scope->GetName() << "\": {" << std::endl;
+		output << in << "{" << std::endl;
 		{
 			indent_scope insc(in);
-			output << in << "\"Time\": " << scope->GetTime() /* not sync */ << "," << std::endl;
+			output << in << "\"data\" { \"title\": \"" << scope->GetName() << "\", }, " << std::endl;
+			output << in << "\"time\": " << scope->GetTime() /* not sync */ << "," << std::endl;
 			HashMap childrenCopy = scope->Children();
 			if(childrenCopy.size()) {
-				output << in << "\"Children\": { " << std::endl;
+				output << in << "\"children\": [ " << std::endl;
 				{
 					for(auto scopeIt = childrenCopy.cbegin(); scopeIt != childrenCopy.cend(); ++scopeIt) {
 						dumpScope(in, scopeIt->second, output);
 					}
 				}
-				output << in << "}, " << std::endl;
+				output << in << "], " << std::endl;
 			}
 		}
 		output << in << "}," << std::endl;
@@ -131,18 +132,22 @@ IReport* Registry::DumpDataJSON()
 	unsigned threadId = 0;
 	opstringstream ostream;
 	indent in;
+	ostream << "\"data\": [" << std::endl;
 	for(auto threadIt = allThreads.cbegin(); threadIt != allThreads.cend(); ++threadIt) {
-		ostream << "\"Thread" << threadId << "\": {" << std::endl;
-		
+		ostream << "{" << std::endl;
+		ostream << "\"data\" { \"title\": " << "\"Thread" << threadId << "\", }, " << std::endl;
 		const auto& scopes = (*threadIt)->GetScopes();
-		for(auto scopeIt = scopes.cbegin(); scopeIt != scopes.cend(); ++scopeIt) {
-			dumpScope(in, scopeIt->second, ostream);
+		if(scopes.size()) {
+			ostream << "\"children\": [ " << std::endl;
+			for(auto scopeIt = scopes.cbegin(); scopeIt != scopes.cend(); ++scopeIt) {
+				dumpScope(in, scopeIt->second, ostream);
+			}
+			ostream << "], " << std::endl;
 		}
-
 		ostream << "}," << std::endl;
 		++threadId;
 	}
-
+	ostream << "]" << std::endl;
 	std::unique_ptr<JSONReport, profi_deleter<JSONReport>> report(profi_new(JSONReport));
 
 	report->GetString() = ostream.str();
