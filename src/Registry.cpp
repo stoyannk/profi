@@ -108,46 +108,54 @@ IReport* Registry::DumpDataJSON()
 	}
 
 	std::function<void (indent, ProfileScope*, opstringstream&)> dumpScope = [&] (indent in, ProfileScope* scope, opstringstream& output) {
-		indent_scope insc(in);
-
-		output << in << "{" << std::endl;
 		{
 			indent_scope insc(in);
-			output << in << "\"data\" { \"title\": \"" << scope->GetName() << "\", }, " << std::endl;
-			output << in << "\"time\": " << scope->GetTime() /* not sync */ << "," << std::endl;
+			output << in << "\"data\": \"" << scope->GetName() << "\", " << std::endl;
 			HashMap childrenCopy = scope->Children();
+			output << in << "\"time\": " << scope->GetTime() /* not sync */ << (childrenCopy.size() ? "," : "") << std::endl;
 			if(childrenCopy.size()) {
 				output << in << "\"children\": [ " << std::endl;
 				{
-					for(auto scopeIt = childrenCopy.cbegin(); scopeIt != childrenCopy.cend(); ++scopeIt) {
+					indent_scope insc(in);
+					for(auto scopeIt = childrenCopy.cbegin(); scopeIt != childrenCopy.cend();) {
+						output << in << "{" << std::endl;
 						dumpScope(in, scopeIt->second, output);
+						output << in << "}" << (++scopeIt != childrenCopy.cend() ? "," : "") << std::endl;
 					}
 				}
-				output << in << "], " << std::endl;
+				output << in << "]" << std::endl;
 			}
 		}
-		output << in << "}," << std::endl;
 	};
 
 	unsigned threadId = 0;
 	opstringstream ostream;
 	indent in;
-	ostream << "\"data\": [" << std::endl;
+	ostream << "{\"data\":[" << std::endl;
+	indent_scope insc(in);
 	for(auto threadIt = allThreads.cbegin(); threadIt != allThreads.cend(); ++threadIt) {
-		ostream << "{" << std::endl;
-		ostream << "\"data\" { \"title\": " << "\"Thread" << threadId << "\", }, " << std::endl;
+		ostream << in << "{" << std::endl;
 		const auto& scopes = (*threadIt)->GetScopes();
-		if(scopes.size()) {
-			ostream << "\"children\": [ " << std::endl;
-			for(auto scopeIt = scopes.cbegin(); scopeIt != scopes.cend(); ++scopeIt) {
-				dumpScope(in, scopeIt->second, ostream);
+		{
+			indent_scope insc(in);
+			ostream << in << "\"data\": " << "\"Thread " << threadId << "\"" << (scopes.size() ? "," : "") << std::endl;
+			if(scopes.size()) {
+				ostream << in << "\"children\": [ " << std::endl;
+				{
+					indent_scope insc(in);
+					for(auto scopeIt = scopes.cbegin(); scopeIt != scopes.cend();) {
+						ostream << in << "{" << std::endl;
+						dumpScope(in, scopeIt->second, ostream);
+						ostream << in << "}" << (++scopeIt != scopes.cend() ? "," : "") << std::endl;
+					}
+				}
+				ostream << in << "] " << std::endl;
 			}
-			ostream << "], " << std::endl;
 		}
-		ostream << "}," << std::endl;
+		ostream << in << "}" << ((threadIt+1 != allThreads.cend()) ? "," : "") << std::endl;
 		++threadId;
 	}
-	ostream << "]" << std::endl;
+	ostream << "]}" << std::endl;
 	std::unique_ptr<JSONReport, profi_deleter<JSONReport>> report(profi_new(JSONReport));
 
 	report->GetString() = ostream.str();

@@ -10,28 +10,10 @@
 	function init() {
 		//read json
 		$.getJSON("output.json", function(data) {
-			console.log(data);
-			// data is a JavaScript object now. Handle it as such
-		});
-	
-		$("#callTree").jstree({ 
-		"json_data" : {
-			"data" : [
-				{ 
-					"data" : "A node", 
-					"metadata" : { id : 23 },
-					"children" : [ "Child 1", "A Child 2" ]
-				},
-				{ 
-					"attr" : { "id" : "li.node.id1" }, 
-					"data" : { 
-						"title" : "Long format demo", 
-						"attr" : { "href" : "#" } 
-					} 
-				}
-			]
-		},
-		"plugins" : [ "themes", "json_data", "ui" ]
+			$("#callTree").jstree({ 
+				"json_data" : data,
+				"plugins" : [ "themes", "json_data", "ui" ]
+			});
 		});
 	}
 	
