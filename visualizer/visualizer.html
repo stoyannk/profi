@@ -1,26 +1,28 @@
+<!DOCTYPE html>
 <html>
 <head>
-    <title>Profi visualizer</title>
-    
-    <script type="text/javascript" src="js/jstree/_lib/jquery.js"></script>
-	<script type="text/javascript" src="js/jstree/jquery.jstree.js"></script>
-	
-	<script type="text/javascript">
-	
-	function init() {
-		//read json
-		$.getJSON("output.json", function(data) {
-			$("#callTree").jstree({ 
-				"json_data" : data,
-				"plugins" : [ "themes", "json_data", "ui" ]
-			});
-		});
-	}
-	
-	window.addEventListener('load', init, false);
-	</script>
+	<meta charset="UTF-8">
+	<title>Profi visualizer</title>
+	<link rel="stylesheet" type="text/css" href="css/themes/default/easyui.css">
+	<link rel="stylesheet" type="text/css" href="css/themes/icon.css">
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
 </head>
 <body>
-	<div id="callTree"></div>
+	<table title="Function trees" class="easyui-treegrid"
+			data-options="
+				url: 'output.json',
+				rownumbers: false,
+				idField: 'id',
+				treeField: 'name'
+			">
+		<thead>
+			<tr>
+				<th data-options="field:'name'" width="220">Scope</th>
+				<th data-options="field:'time'" width="100" align="right">Inclusive time</th>
+			</tr>
+		</thead>
+	</table>
+
 </body>
 </html>

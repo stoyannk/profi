@@ -32,7 +32,7 @@ int main()
 		{
 			PROFI_SCOPE("TestScope")
 			foo();
-
+			
 			recurse(3);
 		}
 	}
