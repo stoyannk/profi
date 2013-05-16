@@ -113,19 +113,28 @@ IReport* Registry::DumpDataJSON()
 			output << in << "\"id\": " << row_id++ << "," << std::endl;
 			output << in << "\"name\": \"" << scope->GetName() << "\", " << std::endl;
 			HashMap childrenCopy = scope->Children();
-			output << in << "\"time\": " << scope->GetTime() /* not sync */ << (childrenCopy.size() ? "," : "") << std::endl;
+			unsigned long long childrenTimes = 0;
 			if(childrenCopy.size()) {
 				output << in << "\"children\": [ " << std::endl;
 				{
 					indent_scope insc(in);
 					for(auto scopeIt = childrenCopy.cbegin(); scopeIt != childrenCopy.cend();) {
+						childrenTimes += scopeIt->second->GetTime();
 						output << in << "{" << std::endl;
 						dumpScope(in, scopeIt->second, row_id, output);
 						output << in << "}" << (++scopeIt != childrenCopy.cend() ? "," : "") << std::endl;
 					}
 				}
-				output << in << "]" << std::endl;
+				output << in << "]," << std::endl;
 			}
+			const auto time = scope->GetTime();
+			const auto count = scope->GetCallCount();
+			const auto excl_time = time - childrenTimes;
+			output << in << "\"excl_time\": " << excl_time << "," << std::endl;
+			output << in << "\"time\": " << time /* not sync */ << "," << std::endl;
+			output << in << "\"call_count\": " << count /* not sync */ << "," << std::endl;
+			output << in << "\"avg_call_incl\": " << time / (double)count << "," << std::endl;
+			output << in << "\"avg_call_excl\": " << excl_time / (double)count << std::endl;
 		}
 	};
 
@@ -142,6 +151,11 @@ IReport* Registry::DumpDataJSON()
 			indent_scope insc(in);
 			ostream << in << "\"id\": " << row_id++ << "," << std::endl;
 			ostream << in << "\"time\": \"\"," << std::endl;
+			ostream << in << "\"excl_time\": \"\"," << std::endl;
+			ostream << in << "\"call_count\": \"\"," << std::endl;
+			ostream << in << "\"avg_call_incl\": \"\"," << std::endl;
+			ostream << in << "\"avg_call_excl\": \"\"," << std::endl;
+
 			ostream << in << "\"name\": " << "\"Thread " << threadId << "\"" << (scopes.size() ? "," : "") << std::endl;
 			if(scopes.size()) {
 				ostream << in << "\"children\": [ " << std::endl;

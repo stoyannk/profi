@@ -10,13 +10,13 @@
 
 void foo() {
 	PROFI_FUNC
-	SIMUL_SLEEP(1000)
+	SIMUL_SLEEP(500)
 }
 
 void recurse(unsigned times)
 {
 	PROFI_FUNC
-	SIMUL_SLEEP(500)
+	SIMUL_SLEEP(100)
 
 	if(times == 0)
 		return;
@@ -30,10 +30,12 @@ int main()
 	{
 		PROFI_FUNC
 		{
-			PROFI_SCOPE("TestScope")
-			foo();
-			
-			recurse(3);
+			for(int i = 0; i < 2; ++i) {
+				PROFI_SCOPE("TestScope")
+				foo();
+				
+				recurse(3);
+			}
 		}
 	}
 

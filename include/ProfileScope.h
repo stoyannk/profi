@@ -13,14 +13,16 @@ public:
 
 	HashMap& Children();
 
-	void IncreaseTime(unsigned long long time);
+	void IncreaseTimeAndCallCount(unsigned long long time);
 	unsigned long long GetTime() const;
+	unsigned GetCallCount() const;
 	
 	const char* GetName() const { return m_Name; }
 
 private:
 	const char* m_Name;
 	unsigned long long m_TotalTime;
+	unsigned m_CallCount;
 
 	HashMap m_ChildProfiles;
 };

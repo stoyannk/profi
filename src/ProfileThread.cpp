@@ -27,7 +27,7 @@ void ProfileThread::EnterScope(const char* name)
 
 void ProfileThread::ExitScope(unsigned long long elapsedTime, ProfileScope* parentScope)
 {
-	m_ActiveScope->IncreaseTime(elapsedTime);
+	m_ActiveScope->IncreaseTimeAndCallCount(elapsedTime);
 	m_ActiveScope = parentScope;
 }
 
