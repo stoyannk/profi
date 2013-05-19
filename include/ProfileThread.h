@@ -5,7 +5,7 @@
 
 namespace profi {
 
-class ProfileThread : boost::noncopyable {
+class ProfileThread : Noncopyable {
 public:
 	ProfileThread();
 	~ProfileThread();

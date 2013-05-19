@@ -9,7 +9,7 @@ namespace profi {
 
 class ProfileThread;
 
-class Registry : boost::noncopyable {
+class Registry : Noncopyable {
 public:
 	static void Initialize(IAllocator* allocator);
 	static void Deinitialize();

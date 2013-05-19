@@ -2,7 +2,7 @@
 
 namespace profi {
 
-class Timer : boost::noncopyable {
+class Timer : Noncopyable {
 public:
 	Timer();
 	unsigned long long Now() const;

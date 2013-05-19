@@ -11,9 +11,16 @@
 #include <functional>
 #include <mutex>
 #include <sstream>
+#include <algorithm>
 
-#include <boost/noncopyable.hpp>
-#include <boost/chrono.hpp>
+class Noncopyable
+{
+	Noncopyable(const Noncopyable&);
+	Noncopyable& operator=(const Noncopyable&);
+protected:
+	Noncopyable(){}
+	~Noncopyable(){}
+};
 
 #ifdef _MSC_VER
 #define thread_local __declspec(thread)

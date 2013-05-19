@@ -4,7 +4,7 @@
 
 namespace profi {
 
-class ProfileScope : boost::noncopyable {
+class ProfileScope : Noncopyable {
 public:
 	ProfileScope(); // for hash map
 
