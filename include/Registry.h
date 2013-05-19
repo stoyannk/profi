@@ -36,7 +36,7 @@ private:
 	typedef std::vector<ProfileThread*, STLAllocator<ProfileThread*>> ProfileThreadsVec;
 	ProfileThreadsVec m_ProfiledThreads;
 
-	boost::thread_specific_ptr<ProfileThread> m_TLSProfiles;
+	static thread_local ProfileThread* m_TLSProfiles;
 
 private:
 	class JSONReport : public IReport

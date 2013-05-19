@@ -13,4 +13,8 @@
 #include <sstream>
 
 #include <boost/noncopyable.hpp>
-#include <boost/thread/tss.hpp>
+#include <boost/chrono.hpp>
+
+#ifdef _MSC_VER
+#define thread_local __declspec(thread)
+#endif
