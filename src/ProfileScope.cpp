@@ -1,6 +1,7 @@
 ﻿#include "precompiled.h"
 
 #include <ProfileScope.h>
+#include <STLAllocator.h>
 
 namespace profi {
 
@@ -17,7 +18,11 @@ ProfileScope::ProfileScope(const char* name)
 {}
 
 ProfileScope::~ProfileScope()
-{}
+{
+	std::for_each(m_ChildProfiles.cbegin(), m_ChildProfiles.cend(), [] (const HashMap::InternalMap::value_type& scope) {
+		profi_delete(scope.second);
+	});
+}
 
 HashMap& ProfileScope::Children()
 {

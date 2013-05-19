@@ -19,7 +19,8 @@ public:
 	HashMap& operator=(const HashMap& other);
 
 	ProfileScope* Get(const char* name);
-	bool Insert(const char* name, ProfileScope* scope);
+	// Takes ownership
+	bool Insert(ProfileScope* scope);
 	
 	InternalMap::const_iterator cbegin() const { return m_InternalMap.cbegin(); };
 	InternalMap::const_iterator cend() const { return m_InternalMap.cend(); };

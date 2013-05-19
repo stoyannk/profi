@@ -11,7 +11,11 @@ ProfileThread::ProfileThread()
 {}
 
 ProfileThread::~ProfileThread()
-{}
+{
+	std::for_each(m_Scopes.cbegin(), m_Scopes.cend(), [] (const HashMap::InternalMap::value_type& scope) {
+		profi_delete(scope.second);
+	});
+}
 
 void ProfileThread::EnterScope(const char* name)
 {
@@ -20,7 +24,7 @@ void ProfileThread::EnterScope(const char* name)
 	ProfileScope* profile = map.Get(name);
 	if(!profile) {
 		profile = profi_new(ProfileScope, name);
-		map.Insert(name, profile);
+		map.Insert(profile);
 	}
 	m_ActiveScope = profile;
 }

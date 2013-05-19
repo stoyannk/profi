@@ -2,6 +2,7 @@
 
 #include <HashMap.h>
 #include <ProfileScope.h>
+#include <STLAllocator.h>
 
 namespace profi
 {
@@ -33,9 +34,9 @@ ProfileScope* HashMap::Get(const char* name) {
 	return (it == m_InternalMap.end()) ? nullptr : it->second;
 }
 
-bool HashMap::Insert(const char* name, ProfileScope* scope) {
+bool HashMap::Insert(ProfileScope* scope) {
 	std::lock_guard<std::mutex> lock(m_Mutex);
-	auto insRes = m_InternalMap.insert(std::make_pair(name, scope));
+	auto insRes = m_InternalMap.insert(std::make_pair(scope->GetName(), scope));
 
 	return insRes.second;
 }

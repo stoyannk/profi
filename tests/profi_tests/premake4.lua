@@ -18,13 +18,13 @@ project 'profi_tests'
 	libdirs { "../../bin/" }
 	
 	configuration "Debug"
-         defines { "DEBUG" }
+         defines { "DEBUG;_VARIADIC_MAX=10" }
          flags { "Symbols" }
 		 targetdir "../../bin"
 		 links { 'profi.lib', 'gtestd.lib', 'gtest_main-mdd.lib' }
  
     configuration "Release"
-         defines { "NDEBUG" }
+         defines { "NDEBUG;_VARIADIC_MAX=10" }
          flags { "Optimize" }
 		 targetdir "../../bin"
 		 links { 'profi.lib', 'gtest.lib', 'gtest_main-md.lib' }
