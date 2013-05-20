@@ -13,6 +13,7 @@ class HashMap
 {
 public:
 	typedef std::unordered_map<const char*, ProfileScope*> InternalMap;
+	typedef InternalMap::value_type value_type;
 
 	HashMap();
 	HashMap(const HashMap& other);

@@ -109,6 +109,11 @@ IReport* Registry::DumpDataJSON()
 
 	std::function<void (indent, ProfileScope*, unsigned&, opstringstream&)> dumpScope = [&] (indent in, ProfileScope* scope, unsigned& row_id, opstringstream& output) {
 		{
+			const auto count = scope->GetCallCount();
+			
+			if(!count)
+				return;
+
 			indent_scope insc(in);
 			output << in << "\"id\": " << row_id++ << "," << std::endl;
 			output << in << "\"name\": \"" << scope->GetName() << "\", " << std::endl;
@@ -128,7 +133,6 @@ IReport* Registry::DumpDataJSON()
 				output << in << "]," << std::endl;
 			}
 			const auto time = scope->GetTime();
-			const auto count = scope->GetCallCount();
 			const auto excl_time = time - childrenTimes;
 			output << in << "\"excl_time\": " << excl_time << "," << std::endl;
 			output << in << "\"time\": " << time /* not sync */ << "," << std::endl;

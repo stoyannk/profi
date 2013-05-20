@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <HashMap.h>
+#include <STLAllocator.h>
 
 namespace profi {
 
@@ -14,8 +15,8 @@ public:
 	HashMap& Children();
 
 	void IncreaseTimeAndCallCount(unsigned long long time);
-	unsigned long long GetTime() const;
-	unsigned GetCallCount() const;
+	unsigned long long GetTime() const { return m_TotalTime; }
+	unsigned GetCallCount() const { return m_CallCount; }
 	
 	const char* GetName() const { return m_Name; }
 

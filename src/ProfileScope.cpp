@@ -35,14 +35,4 @@ void ProfileScope::IncreaseTimeAndCallCount(unsigned long long time)
 	++m_CallCount;
 }
 
-unsigned long long ProfileScope::GetTime() const
-{
-	return m_TotalTime;
-}
-
-unsigned ProfileScope::GetCallCount() const
-{
-	return m_CallCount;
-}
-
 }
