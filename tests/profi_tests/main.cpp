@@ -10,12 +10,18 @@
 
 using namespace profi;
 
+#ifdef DEBUG
+typedef profi::DebugMallocAllocator ProfiAllocator;
+#else
+typedef profi::DefaultMallocAllocator ProfiAllocator;
+#endif
+
 TEST(HashMapTest, CreateMap) {
 	HashMap map;
 }
 
 TEST(HashMapTest, Insert) {
-	profi::DefaultAllocator allocator;
+	ProfiAllocator allocator;
 	profi::Initialize(&allocator);
 
 	HashMap map;
@@ -34,7 +40,7 @@ TEST(HashMapTest, Insert) {
 }
 
 TEST(HashMapTest, Overflow) {
-	profi::DefaultAllocator allocator;
+	ProfiAllocator allocator;
 	profi::Initialize(&allocator);
 
 	HashMap map;
@@ -64,7 +70,7 @@ TEST(HashMapTest, Overflow) {
 }
 
 TEST(HashMapTest, Iterate) {
-	profi::DefaultAllocator allocator;
+	ProfiAllocator allocator;
 	profi::Initialize(&allocator);
 
 	HashMap map;
@@ -91,6 +97,10 @@ TEST(HashMapTest, Iterate) {
 		ASSERT_NE(scope, scopesVec.cend());
 		++count;
 	});
+
+	auto it = map.cbegin();
+	++it;
+	auto it2 = map.Get(names[2].c_str());
 
 	profi::Deinitialize();
 }

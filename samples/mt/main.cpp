@@ -43,9 +43,15 @@ void thread_run2() {
 	recurse(2);
 }
 
+#ifdef DEBUG
+typedef profi::DebugMallocAllocator ProfiAllocator;
+#else
+typedef profi::DefaultMallocAllocator ProfiAllocator;
+#endif
+
 int main()
 {
-	profi::DefaultAllocator allocator;
+	ProfiAllocator allocator;
 	profi::Initialize(&allocator);
 	{
 		PROFI_FUNC

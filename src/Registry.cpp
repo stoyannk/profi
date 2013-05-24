@@ -17,21 +17,7 @@ IAllocator* GetGlobalAllocator()
 {
 	return Registry::Get()->GetAllocator();
 }
-
-void* DefaultAllocator::Allocate(size_t size) {
-	return malloc(size);
-}
-
-void DefaultAllocator::Deallocate(void* ptr) {
-	free(ptr);
-}
-
-DefaultAllocator::DefaultAllocator()
-{}
-
-DefaultAllocator::~DefaultAllocator()
-{}
-  
+ 
 void Registry::Initialize(IAllocator* allocator) {
 	Registry::s_Allocator = allocator;
 	auto instance = static_cast<Registry*>(allocator->Allocate(sizeof(Registry)));
