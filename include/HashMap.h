@@ -2,9 +2,6 @@
 
 #include <profi_decls.h>
 
-//TODO: This is an experimental implementation with a normal hash map + lock; Provide custom high-perf impl
-#include <unordered_map>
-
 namespace profi {
 
 class ProfileScope;
@@ -12,24 +9,52 @@ class ProfileScope;
 class HashMap
 {
 public:
-	typedef std::unordered_map<const char*, ProfileScope*> InternalMap;
-	typedef InternalMap::value_type value_type;
+	typedef ProfileScope* value_type;
+
+	class const_iterator
+	{
+	public:
+		const_iterator(HashMap& owner, size_t id);
+		const_iterator(const const_iterator& other);
+		const_iterator& operator=(const const_iterator& other);
+
+		const HashMap::value_type& operator*() const;
+
+		void operator++();
+		const HashMap::value_type& operator++(int);
+
+		void operator--();
+		const HashMap::value_type& operator--(int);
+
+	private:
+		size_t m_Id;
+		HashMap& m_Owner;
+	};
 
 	HashMap();
+	// safe
 	HashMap(const HashMap& other);
+	// safe - invalidates iterators
 	HashMap& operator=(const HashMap& other);
 
+	// unsafe
 	ProfileScope* Get(const char* name);
-	// Takes ownership
+	
+	// Takes ownership - safe; invalidates iterators!
 	bool Insert(ProfileScope* scope);
 	
-	InternalMap::const_iterator cbegin() const { return m_InternalMap.cbegin(); };
-	InternalMap::const_iterator cend() const { return m_InternalMap.cend(); };
-	size_t size() const { return m_InternalMap.size(); }
+	// unsafe
+	const_iterator cbegin() const;
+	// unsafe
+	const_iterator cend() const;
+	// unsafe
+	size_t size() const { return m_Allocated; }
 
 private:
-	//TODO: This is an experimental implementation with a normal hash map + lock; Provide custom high-perf impl
-	InternalMap m_InternalMap;
+	typedef std::vector<ProfileScope*> storage_t;
+	
+	storage_t m_Storage;
+	size_t m_Allocated;
 	mutable std::mutex m_Mutex;
 };
 
