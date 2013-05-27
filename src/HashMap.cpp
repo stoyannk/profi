@@ -2,43 +2,171 @@
 
 #include <HashMap.h>
 #include <ProfileScope.h>
-#include <STLAllocator.h>
 
 namespace profi
 {
 
+size_t hash_func(const char* key)
+{
+	return (size_t)key << 5;
+}
+
 HashMap::HashMap()
+	: m_Allocated(0)
+	, m_Storage(2)
 {}
 
 HashMap::HashMap(const HashMap& other)
-{
-	*this = other;
-}
+	: m_Allocated(other.m_Allocated)
+	, m_Storage(other.m_Storage)
+{}
 
 HashMap& HashMap::operator=(const HashMap& other)
 {
-	std::lock(m_Mutex, other.m_Mutex); // lock both mutexes simultaneously to avoid deadlocking
-	// adopt locks to unlock them in case of an exception thrown later down
-	std::lock_guard<std::mutex>(m_Mutex, std::adopt_lock);
-	std::lock_guard<std::mutex>(other.m_Mutex, std::adopt_lock);
-
-	m_InternalMap = other.m_InternalMap;
+	if(this != &other)
+	{
+		m_Allocated = other.m_Allocated;
+		m_Storage = other.m_Storage;
+	}
 
 	return *this;
 }
 
-ProfileScope* HashMap::Get(const char* name) {
-	std::lock_guard<std::mutex> lock(m_Mutex);
-	auto it = m_InternalMap.find(name);
+ProfileScope* HashMap::Get(const char* name)
+{
+	const auto hash = hash_func(name);
+	const auto storageSz = m_Storage.size();
+	const auto bucket = hash % storageSz;
+	auto current_bucket = bucket;
+
+	do
+	{
+		if(!m_Storage[current_bucket]) {
+			return nullptr;
+		}
+
+		if((size_t)m_Storage[current_bucket]->GetName() == (size_t)name) {
+			return m_Storage[current_bucket];
+		}
+
+		current_bucket = ++current_bucket % storageSz;
+	} while(bucket != current_bucket);
 	
-	return (it == m_InternalMap.end()) ? nullptr : it->second;
+	return nullptr;
 }
 
-bool HashMap::Insert(ProfileScope* scope) {
-	std::lock_guard<std::mutex> lock(m_Mutex);
-	auto insRes = m_InternalMap.insert(std::make_pair(scope->GetName(), scope));
+bool HashMap::Insert(ProfileScope* scope)
+{
+	static const float REHASH_LOAD = 0.75f;
+	if(m_Allocated / (float)m_Storage.size() >= REHASH_LOAD) {
+		Rehash();
+	}
+	
+	return InsertInternal(scope, m_Storage, m_Allocated);
+}
 
-	return insRes.second;
+void HashMap::Rehash()
+{
+	storage_t newStorage(m_Storage.size() * 2);
+	unsigned newCounter = 0;
+	std::for_each(m_Storage.cbegin(), m_Storage.cend(), [&newStorage, &newCounter](ProfileScope* scope) {
+		InsertInternal(scope, newStorage, newCounter);
+	});
+
+	assert(newCounter == m_Allocated);
+
+	std::swap(m_Storage, newStorage);
+}
+
+bool HashMap::InsertInternal(ProfileScope* scope, storage_t& storage, size_t& counter)
+{
+	const auto name = scope->GetName();
+	const auto hash = hash_func(name);
+	const auto storageSz = storage.size();
+	const auto bucket = hash % storageSz;
+	auto current_bucket = bucket;
+
+	do
+	{
+		if(!storage[current_bucket]) {
+			storage[current_bucket] = scope;
+			++counter;
+			return true;
+		}
+
+		if((size_t)storage[current_bucket]->GetName() == (size_t)name) {
+			return false;
+		}
+
+		current_bucket = ++current_bucket % storageSz;
+	} while(bucket != current_bucket);
+
+	assert(false && "Hash map internal error"); // we should never come here
+
+	return false;
+}
+
+HashMap::const_iterator HashMap::cbegin() const
+{
+	return HashMap::const_iterator(m_Storage, 0u);
+}
+
+HashMap::const_iterator HashMap::cend() const
+{
+	return HashMap::const_iterator(m_Storage, m_Storage.size());
+}
+
+///////////////////////////////
+
+HashMap::const_iterator::const_iterator(const storage_t& owner, size_t id)
+	: m_Id(0)
+	, m_Storage(owner)
+{
+	// navigate to the first non-empty storage
+	while(m_Storage[m_Id] != nullptr && m_Id < m_Storage.size())
+		++m_Id;
+}
+
+HashMap::const_iterator::const_iterator(const const_iterator& other)
+	: m_Id(other.m_Id)
+	, m_Storage(other.m_Storage)
+{}
+
+const HashMap::value_type& HashMap::const_iterator::operator*() const
+{
+	return m_Storage[m_Id];
+}
+
+void HashMap::const_iterator::operator++()
+{
+	++m_Id;
+}
+
+const HashMap::const_iterator HashMap::const_iterator::operator++(int)
+{
+	++m_Id;
+	return const_iterator(m_Storage, m_Id - 1);
+}
+
+void HashMap::const_iterator::operator--()
+{
+	--m_Id;
+}
+
+const HashMap::const_iterator HashMap::const_iterator::operator--(int)
+{
+	--m_Id;
+	return const_iterator(m_Storage, m_Id + 1);
+}
+
+bool HashMap::const_iterator::operator==(const const_iterator& other) const
+{
+	return m_Id == other.m_Id && (&m_Storage == &other.m_Storage);
+}
+
+bool HashMap::const_iterator::operator!=(const const_iterator& other) const
+{
+	return !(*this == other);
 }
 
 }

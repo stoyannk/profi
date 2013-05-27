@@ -1,34 +1,39 @@
 ﻿#pragma once
 
 #include <profi_decls.h>
+#include <STLAllocator.h>
 
 namespace profi {
 
 class ProfileScope;
 
+// Does not support deletion but it's not needed!
 class HashMap
 {
 public:
 	typedef ProfileScope* value_type;
+	typedef std::vector<value_type, STLAllocator<value_type>> storage_t;
 
 	class const_iterator
 	{
 	public:
-		const_iterator(HashMap& owner, size_t id);
+		const_iterator(const storage_t& owner, size_t id);
 		const_iterator(const const_iterator& other);
-		const_iterator& operator=(const const_iterator& other);
-
+		
 		const HashMap::value_type& operator*() const;
 
 		void operator++();
-		const HashMap::value_type& operator++(int);
+		const const_iterator operator++(int);
 
 		void operator--();
-		const HashMap::value_type& operator--(int);
+		const const_iterator operator--(int);
+
+		bool operator==(const const_iterator& other) const;
+		bool operator!=(const const_iterator& other) const;
 
 	private:
 		size_t m_Id;
-		HashMap& m_Owner;
+		const storage_t& m_Storage;
 	};
 
 	HashMap();
@@ -51,11 +56,12 @@ public:
 	size_t size() const { return m_Allocated; }
 
 private:
-	typedef std::vector<ProfileScope*> storage_t;
-	
+	void Rehash();
+	static bool InsertInternal(ProfileScope* scope, storage_t& storage, size_t& counter);
+		
 	storage_t m_Storage;
 	size_t m_Allocated;
-	mutable std::mutex m_Mutex;
+	std::mutex m_Mutex;
 };
 
 }
