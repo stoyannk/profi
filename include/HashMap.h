@@ -7,6 +7,9 @@ namespace profi {
 
 class ProfileScope;
 
+//TODO: Remove mutex per-scope; could be done with just one per thread
+//TODO: Check for perf. improvement if we explicitly save the key in the map instead of derefing it all the time
+
 // Does not support deletion but it's not needed!
 class HashMap
 {
