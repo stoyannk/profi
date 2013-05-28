@@ -93,7 +93,7 @@ TEST(HashMapTest, Iterate) {
 
 	unsigned count = 0;
 	std::for_each(map.cbegin(), map.cend(), [&count, &scopesVec](const HashMap::value_type& value) {
-		auto scope = std::find(scopesVec.cbegin(), scopesVec.cend(), value.second);
+		auto scope = std::find(scopesVec.cbegin(), scopesVec.cend(), value);
 		ASSERT_NE(scope, scopesVec.cend());
 		++count;
 	});

@@ -12,8 +12,8 @@ ProfileThread::ProfileThread()
 
 ProfileThread::~ProfileThread()
 {
-	std::for_each(m_Scopes.cbegin(), m_Scopes.cend(), [] (const HashMap::InternalMap::value_type& scope) {
-		profi_delete(scope.second);
+	std::for_each(m_Scopes.cbegin(), m_Scopes.cend(), [] (const HashMap::value_type& scope) {
+		profi_delete(scope);
 	});
 }
 

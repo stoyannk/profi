@@ -14,7 +14,7 @@ public:
 	typedef ProfileScope* value_type;
 	typedef std::vector<value_type, STLAllocator<value_type>> storage_t;
 
-	class const_iterator
+	class const_iterator : public std::iterator<std::bidirectional_iterator_tag, ProfileScope*>
 	{
 	public:
 		const_iterator(const storage_t& owner, size_t id);
@@ -22,11 +22,11 @@ public:
 		
 		const HashMap::value_type& operator*() const;
 
-		void operator++();
-		const const_iterator operator++(int);
+		const_iterator& operator++();
+		const_iterator operator++(int);
 
-		void operator--();
-		const const_iterator operator--(int);
+		const_iterator&  operator--();
+		const_iterator operator--(int);
 
 		bool operator==(const const_iterator& other) const;
 		bool operator!=(const const_iterator& other) const;
@@ -61,7 +61,7 @@ private:
 		
 	storage_t m_Storage;
 	size_t m_Allocated;
-	std::mutex m_Mutex;
+	mutable std::mutex m_Mutex;
 };
 
 }

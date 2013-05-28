@@ -110,9 +110,9 @@ IReport* Registry::DumpDataJSON()
 				{
 					indent_scope insc(in);
 					for(auto scopeIt = childrenCopy.cbegin(); scopeIt != childrenCopy.cend();) {
-						childrenTimes += scopeIt->second->GetTime();
+						childrenTimes += (*scopeIt)->GetTime();
 						output << in << "{" << std::endl;
-						dumpScope(in, scopeIt->second, row_id, output);
+						dumpScope(in, *scopeIt, row_id, output);
 						output << in << "}" << (++scopeIt != childrenCopy.cend() ? "," : "") << std::endl;
 					}
 				}
@@ -153,7 +153,7 @@ IReport* Registry::DumpDataJSON()
 					indent_scope insc(in);
 					for(auto scopeIt = scopes.cbegin(); scopeIt != scopes.cend();) {
 						ostream << in << "{" << std::endl;
-						dumpScope(in, scopeIt->second, row_id, ostream);
+						dumpScope(in, *scopeIt, row_id, ostream);
 						ostream << in << "}" << (++scopeIt != scopes.cend() ? "," : "") << std::endl;
 					}
 				}
