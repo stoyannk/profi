@@ -17,7 +17,12 @@ typedef profi::DefaultMallocAllocator ProfiAllocator;
 #endif
 
 TEST(HashMapTest, CreateMap) {
+	ProfiAllocator allocator;
+	profi::Initialize(&allocator);
+
 	HashMap map;
+
+	profi::Deinitialize();
 }
 
 TEST(HashMapTest, Insert) {
@@ -35,6 +40,10 @@ TEST(HashMapTest, Insert) {
 	ASSERT_EQ(map.Get("scope0"), scope0);
 	ASSERT_EQ(map.Get("scope1"), scope1);
 	ASSERT_EQ(map.Get("missing"), nullptr);
+
+	std::for_each(map.cbegin(), map.cend(), [] (const HashMap::value_type& scope) {
+		profi_delete(scope);
+	});
 
 	profi::Deinitialize();
 }
@@ -66,6 +75,10 @@ TEST(HashMapTest, Overflow) {
 		ASSERT_NE(scope, nullptr);
 	}
 	
+	std::for_each(map.cbegin(), map.cend(), [] (const HashMap::value_type& scope) {
+		profi_delete(scope);
+	});
+
 	profi::Deinitialize();
 }
 
@@ -101,6 +114,10 @@ TEST(HashMapTest, Iterate) {
 	auto it = map.cbegin();
 	++it;
 	auto it2 = map.Get(names[2].c_str());
+
+	std::for_each(map.cbegin(), map.cend(), [] (const HashMap::value_type& scope) {
+		profi_delete(scope);
+	});
 
 	profi::Deinitialize();
 }

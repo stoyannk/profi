@@ -73,7 +73,8 @@ void HashMap::Rehash()
 	storage_t newStorage(m_Storage.size() * 2);
 	unsigned newCounter = 0;
 	std::for_each(m_Storage.cbegin(), m_Storage.cend(), [&newStorage, &newCounter](ProfileScope* scope) {
-		InsertInternal(scope, newStorage, newCounter);
+		if(scope)
+			InsertInternal(scope, newStorage, newCounter);
 	});
 
 	assert(newCounter == m_Allocated);
