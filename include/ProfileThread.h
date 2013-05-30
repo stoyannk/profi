@@ -21,6 +21,7 @@ public:
 private:
 	ProfileScope* m_ActiveScope;
 	Timer m_Timer;
+	std::mutex m_HashScopesMutex;
 
 	HashMap m_Scopes;
 };

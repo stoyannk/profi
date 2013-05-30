@@ -6,19 +6,22 @@
 namespace profi
 {
 
+//TODO: This is unsuitable for the DLL build
 size_t hash_func(const char* key)
 {
 	return (size_t)key << 5;
 }
 
-HashMap::HashMap()
+HashMap::HashMap(std::mutex& mutex)
 	: m_Allocated(0)
 	, m_Storage(4)
+	, m_Mutex(mutex)
 {}
 
 HashMap::HashMap(const HashMap& other)
+	: m_Mutex(other.m_Mutex)
 {
-	std::lock_guard<std::mutex> lock(other.m_Mutex);
+	std::lock_guard<std::mutex> lock(m_Mutex);
 	m_Allocated = other.m_Allocated;
 	m_Storage = other.m_Storage;
 }
@@ -27,6 +30,8 @@ HashMap& HashMap::operator=(const HashMap& other)
 {
 	if(this != &other)
 	{
+		assert(&m_Mutex == &other.m_Mutex); // only maps generated from the same thread can be copied
+		std::lock_guard<std::mutex> lock(m_Mutex);
 		m_Allocated = other.m_Allocated;
 		m_Storage = other.m_Storage;
 	}

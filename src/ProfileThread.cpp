@@ -8,6 +8,7 @@ namespace profi {
 
 ProfileThread::ProfileThread()
 	: m_ActiveScope(nullptr)
+	, m_Scopes(m_HashScopesMutex)
 {}
 
 ProfileThread::~ProfileThread()
@@ -23,7 +24,7 @@ void ProfileThread::EnterScope(const char* name)
 
 	ProfileScope* profile = map.Get(name);
 	if(!profile) {
-		profile = profi_new(ProfileScope, name);
+		profile = profi_new(ProfileScope, name, m_HashScopesMutex);
 		map.Insert(profile);
 	}
 	m_ActiveScope = profile;

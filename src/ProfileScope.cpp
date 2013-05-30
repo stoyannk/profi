@@ -5,16 +5,11 @@
 
 namespace profi {
 
-ProfileScope::ProfileScope()
-	: m_Name(nullptr)
-	, m_TotalTime(0)
-	, m_CallCount(0)
-{}
-
-ProfileScope::ProfileScope(const char* name)
+ProfileScope::ProfileScope(const char* name, std::mutex& threadHashMutex)
 	: m_Name(name)
 	, m_TotalTime(0)
 	, m_CallCount(0)
+	, m_ChildProfiles(threadHashMutex)
 {}
 
 ProfileScope::~ProfileScope()

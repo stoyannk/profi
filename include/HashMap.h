@@ -7,7 +7,6 @@ namespace profi {
 
 class ProfileScope;
 
-//TODO: Remove mutex per-scope; could be done with just one per thread
 //TODO: Check for perf. improvement if we explicitly save the key in the map instead of derefing it all the time
 
 // Does not support deletion but it's not needed!
@@ -39,7 +38,7 @@ public:
 		const storage_t& m_Storage;
 	};
 
-	HashMap();
+	HashMap(std::mutex& mutex);
 	// safe
 	HashMap(const HashMap& other);
 	// safe - invalidates iterators
@@ -64,7 +63,7 @@ private:
 		
 	storage_t m_Storage;
 	size_t m_Allocated;
-	mutable std::mutex m_Mutex;
+	mutable std::mutex& m_Mutex;
 };
 
 }
