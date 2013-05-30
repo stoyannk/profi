@@ -35,9 +35,11 @@ private:
 	std::mutex m_ThreadsMutex;
 	typedef std::vector<ProfileThread*, STLAllocator<ProfileThread*>> ProfileThreadsVec;
 	ProfileThreadsVec m_ProfiledThreads;
+	typedef std::list<pstring, STLAllocator<pstring>> ProfileNamesList;
+	ProfileNamesList m_ThreadNames;
 
 	static thread_local ProfileThread* m_TLSProfiles;
-
+	
 private:
 	class JSONReport : public IReport
 	{

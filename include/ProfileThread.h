@@ -2,13 +2,14 @@
 
 #include <HashMap.h>
 #include <Timer.h>
+#include <ProfileScope.h>
 
 namespace profi {
 
-class ProfileThread : Noncopyable {
+class ProfileThread : public ProfileScope {
 public:
-	ProfileThread();
-	~ProfileThread();
+	ProfileThread(const char* name, std::mutex& threadHashMutex);
+	virtual ~ProfileThread();
 	
 	void EnterScope(const char* name);
 	void ExitScope(unsigned long long elapsedTime, ProfileScope* parentScope);
@@ -16,14 +17,10 @@ public:
 	const Timer& GetTimer() const { return m_Timer; }
 	ProfileScope* GetActiveScope() const { return m_ActiveScope; }
 
-	const HashMap& GetScopes() const { return m_Scopes; };
-
 private:
 	ProfileScope* m_ActiveScope;
 	Timer m_Timer;
-	std::mutex m_HashScopesMutex;
-
-	HashMap m_Scopes;
+	std::mutex* m_ThreadsOwnMutex;
 };
 
 }

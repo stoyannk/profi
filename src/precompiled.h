@@ -10,6 +10,7 @@
 #include <memory>
 #include <functional>
 #include <mutex>
+#include <list>
 #include <sstream>
 #include <algorithm>
 

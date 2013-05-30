@@ -6,25 +6,25 @@
 
 namespace profi {
 
-ProfileThread::ProfileThread()
-	: m_ActiveScope(nullptr)
-	, m_Scopes(m_HashScopesMutex)
+ProfileThread::ProfileThread(const char* name, std::mutex& threadHashMutex)
+	: ProfileScope(name, threadHashMutex)
+	, m_ActiveScope(nullptr)
+	, m_ThreadsOwnMutex(&threadHashMutex)
 {}
 
 ProfileThread::~ProfileThread()
 {
-	std::for_each(m_Scopes.cbegin(), m_Scopes.cend(), [] (const HashMap::value_type& scope) {
-		profi_delete(scope);
-	});
+	// delete the mutex associated with this thread
+	profi_delete(m_ThreadsOwnMutex);
 }
 
 void ProfileThread::EnterScope(const char* name)
 {
-	auto& map = m_ActiveScope ? m_ActiveScope->Children() : m_Scopes;
+	auto& map = m_ActiveScope ? m_ActiveScope->Children() : Children();
 
 	ProfileScope* profile = map.Get(name);
 	if(!profile) {
-		profile = profi_new(ProfileScope, name, m_HashScopesMutex);
+		profile = profi_new(ProfileScope, name, *m_ThreadsOwnMutex);
 		map.Insert(profile);
 	}
 	m_ActiveScope = profile;
@@ -33,6 +33,11 @@ void ProfileThread::EnterScope(const char* name)
 void ProfileThread::ExitScope(unsigned long long elapsedTime, ProfileScope* parentScope)
 {
 	m_ActiveScope->IncreaseTimeAndCallCount(elapsedTime);
+	
+	if(!parentScope) {
+		IncreaseTimeAndCallCount(elapsedTime); // count all 1-st level calls as well as total time spent in the thread
+	}
+
 	m_ActiveScope = parentScope;
 }
 

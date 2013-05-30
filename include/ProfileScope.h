@@ -8,7 +8,7 @@ namespace profi {
 class ProfileScope : Noncopyable {
 public:
 	explicit ProfileScope(const char* name, std::mutex& threadHashMutex);
-	~ProfileScope();
+	virtual ~ProfileScope();
 
 	HashMap& Children();
 

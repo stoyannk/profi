@@ -48,9 +48,11 @@ Registry::~Registry() {
 
 ProfileThread* Registry::GetOrRegisterThreadProfile() {
 	if(!m_TLSProfiles) {
-		m_TLSProfiles = profi_new(ProfileThread);
-
+		opstringstream name;
 		std::lock_guard<std::mutex> lock(m_ThreadsMutex);
+		name << "Thread " << m_ProfiledThreads.size();
+		m_ThreadNames.push_back(name.str());
+		m_TLSProfiles = profi_new(ProfileThread, m_ThreadNames.back().c_str(), *profi_new(std::mutex));
 		m_ProfiledThreads.push_back(m_TLSProfiles);
 	}
 
@@ -134,34 +136,10 @@ IReport* Registry::DumpDataJSON()
 	unsigned row_id = 0;
 	ostream << "[" << std::endl;
 	indent_scope insc(in);
-	for(auto threadIt = allThreads.cbegin(); threadIt != allThreads.cend(); ++threadIt) {
+	for(auto threadIt = allThreads.cbegin(); threadIt != allThreads.cend();) {
 		ostream << in << "{" << std::endl;
-		const auto& scopes = (*threadIt)->GetScopes();
-		{
-			indent_scope insc(in);
-			ostream << in << "\"id\": " << row_id++ << "," << std::endl;
-			ostream << in << "\"time\": \"\"," << std::endl;
-			ostream << in << "\"excl_time\": \"\"," << std::endl;
-			ostream << in << "\"call_count\": \"\"," << std::endl;
-			ostream << in << "\"avg_call_incl\": \"\"," << std::endl;
-			ostream << in << "\"avg_call_excl\": \"\"," << std::endl;
-
-			ostream << in << "\"name\": " << "\"Thread " << threadId << "\"" << (scopes.size() ? "," : "") << std::endl;
-			if(scopes.size()) {
-				ostream << in << "\"children\": [ " << std::endl;
-				{
-					indent_scope insc(in);
-					for(auto scopeIt = scopes.cbegin(); scopeIt != scopes.cend();) {
-						ostream << in << "{" << std::endl;
-						dumpScope(in, *scopeIt, row_id, ostream);
-						ostream << in << "}" << (++scopeIt != scopes.cend() ? "," : "") << std::endl;
-					}
-				}
-				ostream << in << "] " << std::endl;
-			}
-		}
-		ostream << in << "}" << ((threadIt+1 != allThreads.cend()) ? "," : "") << std::endl;
-		++threadId;
+		dumpScope(in, *threadIt, row_id, ostream);
+		ostream << in << "}" << (++threadIt != allThreads.cend() ? "," : "") << std::endl;
 	}
 	ostream << "]" << std::endl;
 	std::unique_ptr<JSONReport, profi_deleter<JSONReport>> report(profi_new(JSONReport));
