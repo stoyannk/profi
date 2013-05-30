@@ -59,6 +59,27 @@ ProfileThread* Registry::GetOrRegisterThreadProfile() {
 	return m_TLSProfiles;
 }
 
+void Registry::ResetProfiles()
+{
+	ProfileThreadsVec allThreads;
+	{
+		std::lock_guard<std::mutex> lock(m_ThreadsMutex);
+		allThreads = m_ProfiledThreads;
+	}
+
+	std::function<void (ProfileScope*)> resetProfilesRecursive = [&](ProfileScope* scope) {
+		HashMap childrenCopy = scope->Children();
+		std::for_each(childrenCopy.begin(), childrenCopy.end(), [&](ProfileScope* scope){
+			resetProfilesRecursive(scope);
+		});
+		scope->ResetProfile();
+	};
+
+	std::for_each(allThreads.begin(), allThreads.end(), [&](ProfileThread* thread){
+		resetProfilesRecursive(thread);
+	});
+}
+
 struct indent {
 	indent() : Level(0) {}
 	unsigned Level;
@@ -96,38 +117,36 @@ IReport* Registry::DumpDataJSON()
 	}
 
 	std::function<void (indent, ProfileScope*, unsigned&, opstringstream&)> dumpScope = [&] (indent in, ProfileScope* scope, unsigned& row_id, opstringstream& output) {
-		{
-			const auto count = scope->GetCallCount();
-			
-			if(!count)
-				return;
+		const auto count = scope->GetCallCount();
+		
+		if(!count)
+			return;
 
-			indent_scope insc(in);
-			output << in << "\"id\": " << row_id++ << "," << std::endl;
-			output << in << "\"name\": \"" << scope->GetName() << "\", " << std::endl;
-			HashMap childrenCopy = scope->Children();
-			unsigned long long childrenTimes = 0;
-			if(childrenCopy.size()) {
-				output << in << "\"children\": [ " << std::endl;
-				{
-					indent_scope insc(in);
-					for(auto scopeIt = childrenCopy.cbegin(); scopeIt != childrenCopy.cend();) {
-						childrenTimes += (*scopeIt)->GetTime();
-						output << in << "{" << std::endl;
-						dumpScope(in, *scopeIt, row_id, output);
-						output << in << "}" << (++scopeIt != childrenCopy.cend() ? "," : "") << std::endl;
-					}
+		indent_scope insc(in);
+		output << in << "\"id\": " << row_id++ << "," << std::endl;
+		output << in << "\"name\": \"" << scope->GetName() << "\", " << std::endl;
+		HashMap childrenCopy = scope->Children();
+		unsigned long long childrenTimes = 0;
+		if(childrenCopy.size()) {
+			output << in << "\"children\": [ " << std::endl;
+			{
+				indent_scope insc(in);
+				for(auto scopeIt = childrenCopy.begin(); scopeIt != childrenCopy.end();) {
+					childrenTimes += (*scopeIt)->GetTime();
+					output << in << "{" << std::endl;
+					dumpScope(in, *scopeIt, row_id, output);
+					output << in << "}" << (++scopeIt != childrenCopy.end() ? "," : "") << std::endl;
 				}
-				output << in << "]," << std::endl;
 			}
-			const auto time = scope->GetTime();
-			const auto excl_time = time - childrenTimes;
-			output << in << "\"excl_time\": " << excl_time << "," << std::endl;
-			output << in << "\"time\": " << time /* not sync */ << "," << std::endl;
-			output << in << "\"call_count\": " << count /* not sync */ << "," << std::endl;
-			output << in << "\"avg_call_incl\": " << time / (double)count << "," << std::endl;
-			output << in << "\"avg_call_excl\": " << excl_time / (double)count << std::endl;
+			output << in << "]," << std::endl;
 		}
+		const auto time = scope->GetTime();
+		const auto excl_time = time - childrenTimes;
+		output << in << "\"excl_time\": " << excl_time << "," << std::endl;
+		output << in << "\"time\": " << time /* not sync */ << "," << std::endl;
+		output << in << "\"call_count\": " << count /* not sync */ << "," << std::endl;
+		output << in << "\"avg_call_incl\": " << time / (double)count << "," << std::endl;
+		output << in << "\"avg_call_excl\": " << excl_time / (double)count << std::endl;
 	};
 
 	unsigned threadId = 0;

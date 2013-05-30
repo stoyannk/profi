@@ -115,19 +115,19 @@ bool HashMap::InsertInternal(ProfileScope* scope, storage_t& storage, size_t& co
 	return false;
 }
 
-HashMap::const_iterator HashMap::cbegin() const
+HashMap::iterator HashMap::begin()
 {
-	return HashMap::const_iterator(m_Storage, 0u);
+	return HashMap::iterator(m_Storage, 0u);
 }
 
-HashMap::const_iterator HashMap::cend() const
+HashMap::iterator HashMap::end()
 {
-	return HashMap::const_iterator(m_Storage, m_Storage.size());
+	return HashMap::iterator(m_Storage, m_Storage.size());
 }
 
 ///////////////////////////////
 
-HashMap::const_iterator::const_iterator(const storage_t& owner, size_t id)
+HashMap::iterator::iterator(storage_t& owner, size_t id)
 	: m_Id(id)
 	, m_Storage(owner)
 {
@@ -136,17 +136,17 @@ HashMap::const_iterator::const_iterator(const storage_t& owner, size_t id)
 		++m_Id;
 }
 
-HashMap::const_iterator::const_iterator(const const_iterator& other)
+HashMap::iterator::iterator(const iterator& other)
 	: m_Id(other.m_Id)
 	, m_Storage(other.m_Storage)
 {}
 
-const HashMap::value_type& HashMap::const_iterator::operator*() const
+HashMap::value_type& HashMap::iterator::operator*()
 {
 	return m_Storage[m_Id];
 }
 
-HashMap::const_iterator& HashMap::const_iterator::operator++()
+HashMap::iterator& HashMap::iterator::operator++()
 {
 	do {
 		++m_Id;
@@ -155,16 +155,16 @@ HashMap::const_iterator& HashMap::const_iterator::operator++()
 	return *this;
 }
 
-HashMap::const_iterator HashMap::const_iterator::operator++(int)
+HashMap::iterator HashMap::iterator::operator++(int)
 {
 	const auto idNow = m_Id;
 	
 	operator++();
 
-	return const_iterator(m_Storage, idNow);
+	return iterator(m_Storage, idNow);
 }
 
-HashMap::const_iterator& HashMap::const_iterator::operator--()
+HashMap::iterator& HashMap::iterator::operator--()
 {
 	do {
 		--m_Id;
@@ -173,21 +173,21 @@ HashMap::const_iterator& HashMap::const_iterator::operator--()
 	return *this;
 }
 
-HashMap::const_iterator HashMap::const_iterator::operator--(int)
+HashMap::iterator HashMap::iterator::operator--(int)
 {
 	const auto idNow = m_Id;
 	
 	operator--();
 
-	return const_iterator(m_Storage, idNow);
+	return iterator(m_Storage, idNow);
 }
 
-bool HashMap::const_iterator::operator==(const const_iterator& other) const
+bool HashMap::iterator::operator==(const iterator& other) const
 {
 	return m_Id == other.m_Id && (&m_Storage == &other.m_Storage);
 }
 
-bool HashMap::const_iterator::operator!=(const const_iterator& other) const
+bool HashMap::iterator::operator!=(const iterator& other) const
 {
 	return !(*this == other);
 }

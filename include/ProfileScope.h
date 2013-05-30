@@ -13,6 +13,10 @@ public:
 	HashMap& Children();
 
 	void IncreaseTimeAndCallCount(unsigned long long time);
+	// this is NOT thread-safe; the data race on the counters might show up in profiles as errors;
+	// however this has not been an issue so far and we prefer the better perf. without locking;
+	void ResetProfile();
+
 	unsigned long long GetTime() const { return m_TotalTime; }
 	unsigned GetCallCount() const { return m_CallCount; }
 	

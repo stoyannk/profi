@@ -16,26 +16,26 @@ public:
 	typedef ProfileScope* value_type;
 	typedef std::vector<value_type, STLAllocator<value_type>> storage_t;
 
-	class const_iterator : public std::iterator<std::bidirectional_iterator_tag, ProfileScope*>
+	class iterator : public std::iterator<std::bidirectional_iterator_tag, ProfileScope*>
 	{
 	public:
-		const_iterator(const storage_t& owner, size_t id);
-		const_iterator(const const_iterator& other);
+		iterator(storage_t& owner, size_t id);
+		iterator(const iterator& other);
 		
-		const HashMap::value_type& operator*() const;
+		HashMap::value_type& operator*();
 
-		const_iterator& operator++();
-		const_iterator operator++(int);
+		iterator& operator++();
+		iterator operator++(int);
 
-		const_iterator&  operator--();
-		const_iterator operator--(int);
+		iterator&  operator--();
+		iterator operator--(int);
 
-		bool operator==(const const_iterator& other) const;
-		bool operator!=(const const_iterator& other) const;
+		bool operator==(const iterator& other) const;
+		bool operator!=(const iterator& other) const;
 
 	private:
 		size_t m_Id;
-		const storage_t& m_Storage;
+		storage_t& m_Storage;
 	};
 
 	HashMap(std::mutex& mutex);
@@ -51,9 +51,9 @@ public:
 	bool Insert(ProfileScope* scope);
 	
 	// unsafe
-	const_iterator cbegin() const;
+	iterator begin();
 	// unsafe
-	const_iterator cend() const;
+	iterator end();
 	// unsafe
 	size_t size() const { return m_Allocated; }
 

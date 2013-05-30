@@ -24,8 +24,9 @@ public:
 
 	ProfileThread* GetOrRegisterThreadProfile();
 	
+	void ResetProfiles();
 	IReport* DumpDataJSON();
-	
+		
 private:
 	static Registry* s_Instance;
 

@@ -14,7 +14,7 @@ ProfileScope::ProfileScope(const char* name, std::mutex& threadHashMutex)
 
 ProfileScope::~ProfileScope()
 {
-	std::for_each(m_ChildProfiles.cbegin(), m_ChildProfiles.cend(), [] (const HashMap::value_type& scope) {
+	std::for_each(m_ChildProfiles.begin(), m_ChildProfiles.end(), [] (const HashMap::value_type& scope) {
 		profi_delete(scope);
 	});
 }
@@ -28,6 +28,12 @@ void ProfileScope::IncreaseTimeAndCallCount(unsigned long long time)
 {
 	m_TotalTime += time;
 	++m_CallCount;
+}
+
+void ProfileScope::ResetProfile()
+{
+	m_TotalTime = 0;
+	m_CallCount = 0;
 }
 
 }
