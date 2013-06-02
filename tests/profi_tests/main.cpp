@@ -16,23 +16,32 @@ typedef profi::DebugMallocAllocator ProfiAllocator;
 typedef profi::DefaultMallocAllocator ProfiAllocator;
 #endif
 
-TEST(HashMapTest, CreateMap) {
+class HashMapTest : public ::testing::Test
+{
+protected:
+	virtual void SetUp()
+	{
+		profi::Initialize(&allocator);
+	}
+
+	virtual void TearDown()
+	{
+		profi::Deinitialize();
+	}
+
+	std::mutex Mutex;
 	ProfiAllocator allocator;
-	profi::Initialize(&allocator);
+};
 
-	HashMap map;
-
-	profi::Deinitialize();
+TEST_F(HashMapTest, CreateMap) {
+	HashMap map(Mutex);
 }
 
-TEST(HashMapTest, Insert) {
-	ProfiAllocator allocator;
-	profi::Initialize(&allocator);
+TEST_F(HashMapTest, Insert) {
+	HashMap map(Mutex);
 
-	HashMap map;
-
-	ProfileScope* scope0 = profi_new(ProfileScope, "scope0");
-	ProfileScope* scope1 = profi_new(ProfileScope, "scope1");
+	ProfileScope* scope0 = profi_new(ProfileScope, "scope0", Mutex);
+	ProfileScope* scope1 = profi_new(ProfileScope, "scope1", Mutex);
 
 	map.Insert(scope0);
 	map.Insert(scope1);
@@ -41,18 +50,13 @@ TEST(HashMapTest, Insert) {
 	ASSERT_EQ(map.Get("scope1"), scope1);
 	ASSERT_EQ(map.Get("missing"), nullptr);
 
-	std::for_each(map.cbegin(), map.cend(), [] (const HashMap::value_type& scope) {
+	std::for_each(map.begin(), map.end(), [] (const HashMap::value_type& scope) {
 		profi_delete(scope);
 	});
-
-	profi::Deinitialize();
 }
 
-TEST(HashMapTest, Overflow) {
-	ProfiAllocator allocator;
-	profi::Initialize(&allocator);
-
-	HashMap map;
+TEST_F(HashMapTest, Overflow) {
+	HashMap map(Mutex);
 
 	const auto sz = 32;
 
@@ -66,7 +70,7 @@ TEST(HashMapTest, Overflow) {
 	}
 
 	for(unsigned i = 0; i < sz; ++i) {
-		ProfileScope* scope = profi_new(ProfileScope, names[i].c_str());
+		ProfileScope* scope = profi_new(ProfileScope, names[i].c_str(), Mutex);
 		map.Insert(scope);
 	}
 	
@@ -75,18 +79,13 @@ TEST(HashMapTest, Overflow) {
 		ASSERT_NE(scope, nullptr);
 	}
 	
-	std::for_each(map.cbegin(), map.cend(), [] (const HashMap::value_type& scope) {
+	std::for_each(map.begin(), map.end(), [] (const HashMap::value_type& scope) {
 		profi_delete(scope);
 	});
-
-	profi::Deinitialize();
 }
 
-TEST(HashMapTest, Iterate) {
-	ProfiAllocator allocator;
-	profi::Initialize(&allocator);
-
-	HashMap map;
+TEST_F(HashMapTest, Iterate) {
+	HashMap map(Mutex);
 	const auto sz = 32;
 	
 	std::vector<ProfileScope*> scopesVec;
@@ -99,26 +98,24 @@ TEST(HashMapTest, Iterate) {
 	}
 
 	for(unsigned i = 0; i < sz; ++i) {
-		ProfileScope* scope = profi_new(ProfileScope, names[i].c_str());
+		ProfileScope* scope = profi_new(ProfileScope, names[i].c_str(), Mutex);
 		map.Insert(scope);
 		scopesVec.push_back(scope);
 	}
 
 	unsigned count = 0;
-	std::for_each(map.cbegin(), map.cend(), [&count, &scopesVec](const HashMap::value_type& value) {
+	std::for_each(map.begin(), map.end(), [&count, &scopesVec](const HashMap::value_type& value) {
 		auto scope = std::find(scopesVec.cbegin(), scopesVec.cend(), value);
 		ASSERT_NE(scope, scopesVec.cend());
 		++count;
 	});
 
-	auto it = map.cbegin();
+	auto it = map.begin();
 	++it;
 	auto it2 = map.Get(names[2].c_str());
 
-	std::for_each(map.cbegin(), map.cend(), [] (const HashMap::value_type& scope) {
+	std::for_each(map.begin(), map.end(), [] (const HashMap::value_type& scope) {
 		profi_delete(scope);
 	});
-
-	profi::Deinitialize();
 }
 
