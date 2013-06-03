@@ -3,6 +3,8 @@
 #include <profi_decls.h>
 #include <STLAllocator.h>
 
+#define DEBUG_HASHMAP
+
 namespace profi {
 
 class ProfileScope;
@@ -57,9 +59,13 @@ public:
 	// unsafe
 	size_t size() const { return m_Allocated; }
 
+#ifdef DEBUG_HASHMAP
+	unsigned Collisions;
+#endif
+
 private:
 	void Rehash();
-	static bool InsertInternal(ProfileScope* scope, storage_t& storage, size_t& counter);
+	bool InsertInternal(ProfileScope* scope, storage_t& storage, size_t& counter);
 		
 	storage_t m_Storage;
 	size_t m_Allocated;

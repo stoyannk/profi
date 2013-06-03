@@ -6,16 +6,18 @@
 namespace profi
 {
 
-//TODO: This is unsuitable for the DLL build
 size_t hash_func(const char* key)
 {
-	return (size_t)key << 5;
+	return std::hash<const char*>()(key);
 }
 
 HashMap::HashMap(std::mutex& mutex)
 	: m_Allocated(0)
 	, m_Storage(4)
 	, m_Mutex(mutex)
+#ifdef DEBUG_HASHMAP
+	, Collisions(0)
+#endif
 {}
 
 HashMap::HashMap(const HashMap& other)
@@ -77,7 +79,7 @@ void HashMap::Rehash()
 {
 	storage_t newStorage(m_Storage.size() * 2);
 	unsigned newCounter = 0;
-	std::for_each(m_Storage.cbegin(), m_Storage.cend(), [&newStorage, &newCounter](ProfileScope* scope) {
+	std::for_each(m_Storage.cbegin(), m_Storage.cend(), [&newStorage, &newCounter, this](ProfileScope* scope) {
 		if(scope)
 			InsertInternal(scope, newStorage, newCounter);
 	});
@@ -106,7 +108,9 @@ bool HashMap::InsertInternal(ProfileScope* scope, storage_t& storage, size_t& co
 		if((size_t)storage[current_bucket]->GetName() == (size_t)name) {
 			return false;
 		}
-
+		#ifdef DEBUG_HASHMAP
+		++Collisions;
+		#endif
 		current_bucket = ++current_bucket % storageSz;
 	} while(bucket != current_bucket);
 

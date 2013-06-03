@@ -102,6 +102,9 @@ TEST_F(HashMapTest, Iterate) {
 		map.Insert(scope);
 		scopesVec.push_back(scope);
 	}
+#ifdef DEBUG_HASHMAP
+	std::cout << "Collisions after " << sz << " insertions: " << map.Collisions << std::endl;
+#endif
 
 	unsigned count = 0;
 	std::for_each(map.begin(), map.end(), [&count, &scopesVec](const HashMap::value_type& value) {
@@ -117,5 +120,9 @@ TEST_F(HashMapTest, Iterate) {
 	std::for_each(map.begin(), map.end(), [] (const HashMap::value_type& scope) {
 		profi_delete(scope);
 	});
+}
+
+TEST_F(HashMapTest, PerfTest) {
+
 }
 
