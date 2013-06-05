@@ -4,6 +4,7 @@
 #include <ScopeExit.h>
 #include <ProfileThread.h>
 #include <ProfileScope.h>
+#include <Timer.h>
 
 #include <stdlib.h>
 
@@ -204,6 +205,10 @@ void Deinitialize() {
 
 IReport* GetReportJSON() {
 	return Registry::Get()->DumpDataJSON();
+}
+
+unsigned GetTimerBaseLine() {
+	return Timer::GetBaseLine();
 }
 
 }

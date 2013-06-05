@@ -7,7 +7,7 @@
 	#include <Reports.h>
 
 	#ifdef _MSC_VER
-	#define __PRETTY_FUNCTION__ __FUNCSIG__
+		#define __PRETTY_FUNCTION__ __FUNCSIG__
 	#endif
 	
 	#define PROFI_FUNC profi::LocalProfileScope lps_##__LINE__##(__PRETTY_FUNCTION__);
@@ -18,6 +18,7 @@
 		void Deinitialize();
 
 		IReport* GetReportJSON();
+		unsigned GetTimerBaseLine();
 	}
 
 #else
