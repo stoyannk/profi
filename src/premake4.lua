@@ -4,6 +4,7 @@ project "profi"
 	uuid '7CE179F7-6A98-4744-9B2D-FFFF433A8300'
 	
 	includedirs { '../include/' }
+	includedirs { '../src/' }
 	dofile 'third_party.lua'
 		
 	filesInProj = {

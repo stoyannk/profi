@@ -121,8 +121,3 @@ TEST_F(HashMapTest, Iterate) {
 		profi_delete(scope);
 	});
 }
-
-TEST_F(HashMapTest, PerfTest) {
-
-}
-

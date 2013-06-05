@@ -14,7 +14,7 @@ project 'profi_tests'
 	
 	flags { 'NoRTTI', 'EnableSSE2' }
 
-	includedirs { '../../include/', '../gtest-1.6.0/include' }
+	includedirs { '../../include/', '../../src/', '../gtest-1.6.0/include' }
 	libdirs { "../../bin/" }
 	
 	configuration "Debug"
