@@ -8,6 +8,20 @@
 
 #endif
 
+#ifdef _MSC_VER
+	#ifdef PROFI_BUILD
+	#define PROFI_EXPORTED_SYMBOL __declspec(dllexport)
+	#else
+	#define PROFI_EXPORTED_SYMBOL __declspec(dllimport)
+	#endif
+#endif
+
+#if defined(PROFI_DYNAMIC_LINK)
+#define PROFI_EXPORT PROFI_EXPORTED_SYMBOL
+#else
+#define PROFI_EXPORT
+#endif
+
 #define PROFI_TIMER_QPC 1
 #define PROFI_TIMER_RDTSC 2
 

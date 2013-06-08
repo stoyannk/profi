@@ -20,13 +20,22 @@ project 'mt'
 	includedirs { '../../include/' }
 	links { '../../bin/profi' }
 	libdirs { "../../bin/" }
+
+	targetdir "../../bin"
 	
 	configuration "Debug"
          defines { "DEBUG" }
          flags { "Symbols" }
-		 targetdir "../../bin"
  
     configuration "Release"
          defines { "NDEBUG" }
          flags { "Optimize" }
-		 targetdir "../../bin"
+		 
+ 	configuration "Debug Dynamic"
+         defines { "DEBUG", "PROFI_DYNAMIC_LINK" }
+         flags { "Symbols" }
+ 
+    configuration "Release  Dynamic"
+         defines { "NDEBUG", "PROFI_DYNAMIC_LINK" }
+         flags { "Optimize" }
+		 

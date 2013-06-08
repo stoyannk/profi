@@ -1,5 +1,6 @@
 ﻿#include "precompiled.h"
 
+#include <profi.h>
 #include <Registry.h>
 #include <ScopeExit.h>
 #include <ProfileThread.h>

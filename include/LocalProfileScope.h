@@ -4,7 +4,7 @@ namespace profi {
 class ProfileThread;
 class ProfileScope;
 
-class LocalProfileScope {
+class PROFI_EXPORT LocalProfileScope {
 public:
 	LocalProfileScope(const char* name);
 	~LocalProfileScope();

@@ -24,13 +24,23 @@ project "profi"
 	pchsource('precompiled.cpp')
 	
 	flags { 'NoRTTI', 'EnableSSE2' }
+
+	targetdir "../bin"
 	
 	configuration "Debug"
-         defines { "DEBUG" }
+         defines { "DEBUG", "PROFI_BUILD" }
          flags { "Symbols" }
-		 targetdir "../bin"
  
     configuration "Release"
-         defines { "NDEBUG" }
+         defines { "NDEBUG", "PROFI_BUILD" }
          flags { "Optimize" }
-		 targetdir "../bin"
+
+	configuration "Debug Dynamic"
+         kind "SharedLib"
+		 defines { "DEBUG", "PROFI_BUILD", "PROFI_DYNAMIC_LINK" }
+         flags { "Symbols" }
+ 
+    configuration "Release Dynamic"
+         kind "SharedLib"
+		 defines { "NDEBUG", "PROFI_BUILD", "PROFI_DYNAMIC_LINK" }
+         flags { "Optimize" }

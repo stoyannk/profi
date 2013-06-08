@@ -14,15 +14,16 @@
 	#define PROFI_SCOPE(NAME) profi::LocalProfileScope lpss_##__LINE__##(NAME);
 	
 	namespace profi {
-		void Initialize(IAllocator* allocator);
-		void Deinitialize();
+		PROFI_EXPORT void Initialize(IAllocator* allocator);
+		PROFI_EXPORT void Deinitialize();
 
-		IReport* GetReportJSON();
-		unsigned GetTimerBaseLine();
+		PROFI_EXPORT IReport* GetReportJSON();
+		PROFI_EXPORT unsigned GetTimerBaseLine();
 	}
 
 #else
 
 	#define PROFI_FUNC
+	#define PROFI_SCOPE(NAME)
 
 #endif

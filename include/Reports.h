@@ -4,7 +4,7 @@
 
 namespace profi {
 
-class IReport {
+class PROFI_EXPORT IReport {
 public:
 	virtual ~IReport() {};
 	virtual const void* Data() = 0;
