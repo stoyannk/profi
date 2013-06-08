@@ -20,8 +20,8 @@ project "profi"
 		['Header Files'] = '*.h',
 	}
 	
-	pchheader(path.getabsolute('./precompiled.h'))
-	pchsource(path.getabsolute('./precompiled.cpp'))
+	pchheader('precompiled.h')
+	pchsource('precompiled.cpp')
 	
 	flags { 'NoRTTI', 'EnableSSE2' }
 	

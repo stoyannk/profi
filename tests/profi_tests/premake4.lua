@@ -21,10 +21,10 @@ project 'profi_tests'
          defines { "DEBUG;_VARIADIC_MAX=10" }
          flags { "Symbols" }
 		 targetdir "../../bin"
-		 links { 'profi.lib', 'gtestd.lib', 'gtest_main-mdd.lib' }
+		 links { '../../bin/profi', '../../bin/gtestd', '../../bin/gtest_main-mdd' }
  
     configuration "Release"
          defines { "NDEBUG;_VARIADIC_MAX=10" }
          flags { "Optimize" }
 		 targetdir "../../bin"
-		 links { 'profi.lib', 'gtest.lib', 'gtest_main-md.lib' }
+		 links { '../../bin/profi', '../../bin/gtest', '../../bin/gtest_main-md' }

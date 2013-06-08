@@ -7,8 +7,8 @@ project 'simple'
 	
 	files { '**.h', '**.cpp' }
 
-	pchheader(path.getabsolute('./precompiled.h'))
-	pchsource(path.getabsolute('./precompiled.cpp'))
+	pchheader('precompiled.h')
+	pchsource('precompiled.cpp')
 	
 	vpaths {
 		['Source Files'] = '*.cpp',
@@ -18,7 +18,7 @@ project 'simple'
 	flags { 'NoRTTI', 'EnableSSE2' }
 
 	includedirs { '../../include/' }
-	links { 'profi.lib' }
+	links { '../../bin/profi' }
 	libdirs { "../../bin/" }
 	
 	configuration "Debug"
