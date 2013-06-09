@@ -14,6 +14,7 @@ namespace profi {
 Registry* Registry::s_Instance = nullptr;
 IAllocator* Registry::s_Allocator = nullptr;
 ProfileThread* Registry::m_TLSProfiles = nullptr;
+const char* Registry::ThreadNames = nullptr;
 
 IAllocator* GetGlobalAllocator()
 {
@@ -52,7 +53,11 @@ ProfileThread* Registry::GetOrRegisterThreadProfile() {
 	if(!m_TLSProfiles) {
 		opstringstream name;
 		std::lock_guard<std::mutex> lock(m_ThreadsMutex);
-		name << "Thread " << m_ProfiledThreads.size();
+		if(!ThreadNames) {
+			name << "Thread " << m_ProfiledThreads.size();
+		} else {
+			name << ThreadNames;
+		}
 		m_ThreadNames.push_back(name.str());
 		m_TLSProfiles = profi_new(ProfileThread, m_ThreadNames.back().c_str(), *profi_new(std::mutex));
 		m_ProfiledThreads.push_back(m_TLSProfiles);
@@ -210,6 +215,10 @@ IReport* GetReportJSON() {
 
 unsigned GetTimerBaseLine() {
 	return Timer::GetBaseLine();
+}
+
+void NameThread(const char* name) {
+	Registry::ThreadNames = name;
 }
 
 }

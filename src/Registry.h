@@ -26,7 +26,9 @@ public:
 	
 	void ResetProfiles();
 	IReport* DumpDataJSON();
-		
+
+	static thread_local const char* ThreadNames;
+
 private:
 	static Registry* s_Instance;
 
@@ -40,7 +42,7 @@ private:
 	ProfileNamesList m_ThreadNames;
 
 	static thread_local ProfileThread* m_TLSProfiles;
-	
+
 private:
 	class JSONReport : public IReport
 	{

@@ -3,7 +3,9 @@
 #include <profi_decls.h>
 #include <STLAllocator.h>
 
+#ifndef NDEBUG
 #define DEBUG_HASHMAP
+#endif
 
 namespace profi {
 

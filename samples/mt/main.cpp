@@ -28,7 +28,7 @@ std::atomic<bool> threadStart = false;
 void thread_run1() {
 	// wait for all threads to start
 	while(!threadStart);
-
+	PROFI_NAME_THREAD("Worker #1")
 	PROFI_SCOPE("ThreadScope1")
 	foo();
 	SIMUL_SLEEP(200)
@@ -37,7 +37,7 @@ void thread_run1() {
 void thread_run2() {
 	// wait for all threads to start
 	while(!threadStart);
-
+	PROFI_NAME_THREAD("Worker #2")
 	PROFI_FUNC
 	SIMUL_SLEEP(500)
 	recurse(2);
@@ -54,6 +54,7 @@ int main()
 	ProfiAllocator allocator;
 	profi::Initialize(&allocator);
 	{
+		PROFI_NAME_THREAD("MainThread")
 		PROFI_FUNC
 		{
 			PROFI_SCOPE("StartThreads")
