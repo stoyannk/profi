@@ -123,7 +123,7 @@ IReport* Registry::DumpDataJSON()
 		allThreads = m_ProfiledThreads;
 	}
 
-	std::function<void (indent, ProfileScope*, unsigned&, opstringstream&)> dumpScope = [&] (indent in, ProfileScope* scope, unsigned& row_id, opstringstream& output) {
+	std::function<void (indent, const unsigned long long, ProfileScope*, unsigned&, opstringstream&)> dumpScope = [&] (indent in, const unsigned long long totalTime, ProfileScope* scope, unsigned& row_id, opstringstream& output) {
 		const auto count = scope->GetCallCount();
 		
 		if(!count)
@@ -141,7 +141,7 @@ IReport* Registry::DumpDataJSON()
 				for(auto scopeIt = childrenCopy.begin(); scopeIt != childrenCopy.end();) {
 					childrenTimes += (*scopeIt)->GetTime();
 					output << in << "{" << std::endl;
-					dumpScope(in, *scopeIt, row_id, output);
+					dumpScope(in, totalTime, *scopeIt, row_id, output);
 					output << in << "}" << (++scopeIt != childrenCopy.end() ? "," : "") << std::endl;
 				}
 			}
@@ -150,7 +150,9 @@ IReport* Registry::DumpDataJSON()
 		const auto time = scope->GetTime();
 		const auto excl_time = time - childrenTimes;
 		output << in << "\"excl_time\": " << excl_time << "," << std::endl;
+		output << in << "\"excl_time_perc\": " << (excl_time / double(totalTime)) * 100.0 << "," << std::endl;
 		output << in << "\"time\": " << time /* not sync */ << "," << std::endl;
+		output << in << "\"time_perc\": " << (time / double(totalTime)) * 100.0 /* not sync */ << "," << std::endl;
 		output << in << "\"call_count\": " << count /* not sync */ << "," << std::endl;
 		output << in << "\"avg_call_incl\": " << time / (double)count << "," << std::endl;
 		output << in << "\"avg_call_excl\": " << excl_time / (double)count << std::endl;
@@ -162,9 +164,11 @@ IReport* Registry::DumpDataJSON()
 	unsigned row_id = 0;
 	ostream << "[" << std::endl;
 	indent_scope insc(in);
+	unsigned long long totalTime = 0;
 	for(auto threadIt = allThreads.cbegin(); threadIt != allThreads.cend();) {
 		ostream << in << "{" << std::endl;
-		dumpScope(in, *threadIt, row_id, ostream);
+		totalTime = (*threadIt)->GetTime();
+		dumpScope(in, totalTime, *threadIt, row_id, ostream);
 		ostream << in << "}" << (++threadIt != allThreads.cend() ? "," : "") << std::endl;
 	}
 	ostream << "]" << std::endl;
