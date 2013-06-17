@@ -46,6 +46,7 @@ namespace profi {
 				mov cycles_low, eax
 				popad
 		}
+		return ((unsigned long long)cycles_high << 32) | cycles_low;
 #else
 #error Profi timing method not specified
 #endif
