@@ -15,6 +15,7 @@
 #include <list>
 #include <sstream>
 #include <algorithm>
+#include <atomic>
 
 class Noncopyable
 {

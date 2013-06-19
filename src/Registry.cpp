@@ -13,21 +13,118 @@ namespace profi {
 
 Registry* Registry::s_Instance = nullptr;
 IAllocator* Registry::s_Allocator = nullptr;
+IAllocator* Registry::s_InternalAllocator = nullptr;
+
 ProfileThread* Registry::m_TLSProfiles = nullptr;
 const char* Registry::ThreadNames = nullptr;
 
+InternalAllocator::Page* InternalAllocator::Page::Allocate(IAllocator* allocator, size_t sz)
+{
+	const size_t pageTotalSize = sz + sizeof(Page);
+	Page* memory = static_cast<Page*>(allocator->Allocate(pageTotalSize));
+	new(memory) Page(memory, sz);
+
+	return memory;
+}
+
+InternalAllocator::Page::Page(void* memory, size_t sz)
+	: m_Memory(memory)
+	, m_Size(sz)
+	, CurrentPtr(static_cast<char*>(memory) + sizeof(Page))
+	, m_Previous(nullptr)
+{}
+
+InternalAllocator::Page::~Page()
+{}
+
+namespace {
+	const size_t PAGE_SIZE = 1024 * 1024; // 1MB
+}
+
+InternalAllocator::InternalAllocator(IAllocator* externalAllocator)
+	: m_ExternalAllocator(externalAllocator)
+{
+	// allocate a page
+	Page* page = Page::Allocate(externalAllocator, PAGE_SIZE);
+	
+	std::lock_guard<std::mutex> l(m_PagesMutex);
+	m_Tail = page;
+}
+
+InternalAllocator::~InternalAllocator()
+{}
+
+void* InternalAllocator::Allocate(size_t size)
+{
+	char* returnPtr = m_Tail->CurrentPtr;
+	for(;;)
+	{
+		char* newPtr = returnPtr + size + (4 - size & 3); // round to 4 bytes
+		char* startPtr = m_Tail->GetStartPtr();
+
+		if(size_t(newPtr - startPtr) < m_Tail->GetSize()) {
+			if(m_Tail->CurrentPtr.compare_exchange_weak(returnPtr, newPtr))
+			{
+				break;
+			}
+		} else {
+			// not enough memory - we need a new page
+			auto tail = m_Tail;
+			{
+				std::lock_guard<std::mutex> l(m_PagesMutex);
+				if(tail == m_Tail) // check if tail hasn't changed in the mean time
+				{
+					Page* page = Page::Allocate(m_ExternalAllocator, PAGE_SIZE);
+					page->GetPrevious() = tail;
+					m_Tail = page;
+				}
+			}
+		}
+	}
+
+	return returnPtr;
+}
+
+void InternalAllocator::Deallocate(void* ptr)
+{
+	// do nothing!
+}
+
+void InternalAllocator::ReleaseAllMemory()
+{
+	std::lock_guard<std::mutex> l(m_PagesMutex);
+	// walk all pages backwards and kill them
+	Page* next = m_Tail;
+	while(next) {
+		auto current = next;
+		next = current->GetPrevious();
+		current->~Page();
+		m_ExternalAllocator->Deallocate(current->GetMemory());
+	}
+}
+ 
 IAllocator* GetGlobalAllocator()
 {
 	return Registry::Get()->GetAllocator();
 }
  
 void Registry::Initialize(IAllocator* allocator) {
-	Registry::s_Allocator = allocator;
-	auto instance = static_cast<Registry*>(allocator->Allocate(sizeof(Registry)));
-	auto ex = make_scope_exit([instance, allocator] {
-		allocator->Deallocate(instance);
-		Registry::s_Allocator = nullptr;
+	s_Allocator = allocator;
+	#if PROFI_ALLOCATOR == PROFI_LINEAR_ALLOCATOR
+	// allocate the internal allocator (ugh)
+	auto internalAllocator = static_cast<InternalAllocator*>(allocator->Allocate(sizeof(InternalAllocator)));
+	new(internalAllocator) InternalAllocator(allocator);
+	s_InternalAllocator = internalAllocator;
+	#else
+	s_InternalAllocator = s_Allocator;
+	#endif
+
+	auto instance = static_cast<Registry*>(s_InternalAllocator->Allocate(sizeof(Registry)));
+	auto ex = make_scope_exit([&] {
+		s_InternalAllocator->Deallocate(instance);
+		s_Allocator = s_InternalAllocator = nullptr;
 	});
+
 	new(instance) Registry(allocator);
 	ex.dismiss();
 
@@ -36,8 +133,13 @@ void Registry::Initialize(IAllocator* allocator) {
 
 void Registry::Deinitialize() {
 	s_Instance->~Registry();
-	s_Instance->s_Allocator->Deallocate(s_Instance);
+	s_Instance->s_InternalAllocator->Deallocate(s_Instance);
 	s_Instance = nullptr;
+
+	#if PROFI_ALLOCATOR == PROFI_LINEAR_ALLOCATOR
+	static_cast<InternalAllocator*>(s_InternalAllocator)->ReleaseAllMemory();
+	s_Allocator->Deallocate(s_InternalAllocator);
+	#endif
 }
 
 Registry::Registry(IAllocator* allocator)

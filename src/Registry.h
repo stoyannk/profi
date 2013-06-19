@@ -9,6 +9,43 @@ namespace profi {
 
 class ProfileThread;
 
+class InternalAllocator : public IAllocator
+{
+public:
+	InternalAllocator(IAllocator* externalAllocator);
+	virtual ~InternalAllocator();
+
+	virtual void* Allocate(size_t size) override;
+	virtual void Deallocate(void* ptr) override;
+
+	void ReleaseAllMemory();
+
+private:
+	IAllocator* m_ExternalAllocator;
+	class Page
+	{
+	public:
+		static Page* Allocate(IAllocator* allocator, size_t sz);
+		~Page();
+		
+		size_t GetSize() const { return m_Size; }
+		Page*& GetPrevious() { return m_Previous; }
+		char* GetStartPtr() const { return static_cast<char*>(m_Memory) + sizeof(Page); }
+		void* GetMemory() const { return m_Memory; };
+
+		std::atomic<char*> CurrentPtr;
+		
+	private:
+		Page(void* memory, size_t sz);
+
+		void* m_Memory;	// real adress memory WITH the instance data
+		size_t m_Size; // size WITHOUT the instance data
+		Page* m_Previous;
+	};
+	Page* m_Tail;
+	std::mutex m_PagesMutex;
+};
+
 class Registry : Noncopyable {
 public:
 	static void Initialize(IAllocator* allocator);
@@ -19,7 +56,7 @@ public:
 	}
 
 	IAllocator* GetAllocator() const {
-		return s_Allocator;
+		return s_InternalAllocator;
 	}
 
 	ProfileThread* GetOrRegisterThreadProfile();
@@ -67,6 +104,7 @@ private:
 
 private:
 	static IAllocator* s_Allocator;
+	static IAllocator* s_InternalAllocator;
 };
 
 

@@ -92,6 +92,4 @@ DefaultAllocator<CountPolicy>::~DefaultAllocator()
 typedef DefaultAllocator<CountMallocPolicy>	DebugMallocAllocator;
 typedef DefaultAllocator<CountMallocPolicy>	DefaultMallocAllocator;
 
-//TODO: Implement another better high-perf(per-thread) allocator
-
 }
