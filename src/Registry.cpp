@@ -59,17 +59,17 @@ void* InternalAllocator::Allocate(size_t size)
 	char* returnPtr = m_Tail->CurrentPtr;
 	for(;;)
 	{
+		auto tail = m_Tail;
 		char* newPtr = returnPtr + size + (4 - size & 3); // round to 4 bytes
-		char* startPtr = m_Tail->GetStartPtr();
+		char* startPtr = tail->GetStartPtr();
 
-		if(size_t(newPtr - startPtr) < m_Tail->GetSize()) {
-			if(m_Tail->CurrentPtr.compare_exchange_weak(returnPtr, newPtr))
+		if(size_t(newPtr - startPtr) < tail->GetSize()) {
+			if(tail->CurrentPtr.compare_exchange_weak(returnPtr, newPtr))
 			{
 				break;
 			}
 		} else {
 			// not enough memory - we need a new page
-			auto tail = m_Tail;
 			{
 				std::lock_guard<std::mutex> l(m_PagesMutex);
 				if(tail == m_Tail) // check if tail hasn't changed in the mean time
