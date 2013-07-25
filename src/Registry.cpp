@@ -57,13 +57,15 @@ InternalAllocator::~InternalAllocator()
 void* InternalAllocator::Allocate(size_t size)
 {
 	char* returnPtr = m_Tail->CurrentPtr;
+	const auto roundedSize = size + (4 - size & 3);
 	for(;;)
 	{
 		auto tail = m_Tail;
-		char* newPtr = returnPtr + size + (4 - size & 3); // round to 4 bytes
+		returnPtr = tail->CurrentPtr;
+		char* newPtr = returnPtr + roundedSize; // round to 4 bytes
 		char* startPtr = tail->GetStartPtr();
 
-		if(size_t(newPtr - startPtr) < tail->GetSize()) {
+		if(size_t(newPtr - startPtr) <= tail->GetSize()) {
 			if(tail->CurrentPtr.compare_exchange_weak(returnPtr, newPtr))
 			{
 				break;
@@ -74,7 +76,7 @@ void* InternalAllocator::Allocate(size_t size)
 				std::lock_guard<std::mutex> l(m_PagesMutex);
 				if(tail == m_Tail) // check if tail hasn't changed in the mean time
 				{
-					Page* page = Page::Allocate(m_ExternalAllocator, PAGE_SIZE);
+					Page* page = Page::Allocate(m_ExternalAllocator, std::max(PAGE_SIZE, roundedSize));
 					page->GetPrevious() = tail;
 					m_Tail = page;
 				}
