@@ -15,7 +15,7 @@ void foo() {
 
 void recurse(unsigned times)
 {
-	PROFI_FUNC
+	PROFI_FUNC_S1
 	SIMUL_SLEEP(100)
 
 	if(times == 0)
