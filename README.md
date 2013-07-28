@@ -18,12 +18,18 @@ Features
 Motivation
 =====
 There aren't alot of fast, simple, instrumenting and multithreading-friendly profiling libraries around. 
+
 A primary goal of profi is to be simple, unobtrusive and fast. Profiling code can be added everywhere and there is no need
 to 'initialize' a thread like in other libraries. The JSON output and HTML page that renders it make analyzing the data easier but
 there is more work to be done in the HTML to make it more user-friendly for very large data sets. 
-Multithreaded code is the primary target of profi. DLL-awareness is also very important because all the projects I work on are broken up in many shared libraries 
+
+Multithreaded code is the primary target of profi. 
+
+DLL-awareness is also very important because all the projects I work on are broken up in many shared libraries 
 at least during development.
+
 An excellent library that shares many similarities in it's design is the "High Performance C++ Profiler" (http://code.google.com/p/high-performance-cplusplus-profiler/).
+
 Visual Studio has a good instrumenting profiler that however will blindly profile all functions. For large projects this might mean too many hard to read 
 data as well as too much slow-down for the application. Profi will be cross-platform soon.
 With profi you can control and profile just some critical parts of the program. If you are careful when controlling the granularity of the profile it can even 
@@ -32,16 +38,21 @@ be left running in release or production builds because the slow-down will be ne
 Implementation
 =====
 The library keeps the profiling stacks of every thread separately to minimize data sharing across threads and hence avoid the need of data locking.
+
 A custom hash map implementation is used to keep track of the prfiling scopes and their respective timers and counters. 
 I use a custom hash map because I don't need to delete any data from it ever and this allows me to make a faster and simpler implementation. 
+
 When a profiling data dump has to be performed, the whole hash map for a scope is copied to minimize locking span. The data is dumped from the copy.
-Two timing methods are supported: QueryPerformanceCounter and rdtsc. The library supports CPU flushing when timing. For more details on 
-timing methods please refer to my post in the Coherent Labs blog - http://blog.coherent-labs.com/2013/03/timestamps-for-performance-measurements.html.
+
+Two timing methods are supported: QueryPerformanceCounter and rdtsc. 
+
+The library supports CPU flushing when timing. For more details on timing methods please refer to my post in the Coherent Labs blog - http://blog.coherent-labs.com/2013/03/timestamps-for-performance-measurements.html.
 
 Requirements
 =====
 Currently the library runs on Windows only, mostly because I hadn't time to port it to other platforms - something that should be trivial as the everything was written with
 portability in mind.
+
 Tested on MSVC 2010 & MSVC 2012. A C++11 compliant compiler and STL library are required.
 Premake is required to generate the project files.
 
