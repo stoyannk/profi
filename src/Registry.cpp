@@ -332,4 +332,8 @@ void NameThread(const char* name) {
 	Registry::ThreadNames = name;
 }
 
+void ResetProfiles() {
+	Registry::Get()->ResetProfiles();
+}
+
 }

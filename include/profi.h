@@ -55,4 +55,6 @@ namespace profi {
 	PROFI_EXPORT IReport* GetReportJSON();
 	PROFI_EXPORT unsigned GetTimerBaseLine();
 	PROFI_EXPORT void NameThread(const char* name);
+
+	PROFI_EXPORT void ResetProfiles();
 }
