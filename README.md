@@ -53,13 +53,13 @@ Requirements
 Currently the library runs on Windows only, mostly because I hadn't time to port it to other platforms - something that should be trivial as the everything was written with
 portability in mind.
 
-Tested on MSVC 2010 & MSVC 2012. A C++11 compliant compiler and STL library are required.
+Tested on MSVC 2012. A C++11 compliant compiler and STL library are required.
 Premake is required to generate the project files.
 
 Usage
 =====
 1. Use premake4 (http://industriousone.com/premake) to generate the project and solution files. 
-In a command prompt in the main folder of profi run "premake4 vs2010ng"
+In a command prompt in the main folder of profi run "premake4 vs2012"
 2. Open the "profi_all.sln" solution. Compile the library.
 3. Consult the "simple" and "mt" sample applications for sample usages of the library.
 4. "simple" and "mt" dump their data in a file named "output.json" in their respective folders. JSON files created by profi 
