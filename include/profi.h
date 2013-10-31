@@ -12,9 +12,12 @@
 	#ifdef _MSC_VER
 		#define __PRETTY_FUNCTION__ __FUNCSIG__
 	#endif
+
+	#define PROFI_CONCAT(x, y) x ## y
+	#define PROFI_CONCAT2(x, y) PROFI_CONCAT(x, y)
 	
-	#define PROFI_FUNC profi::LocalProfileScope lps_##__LINE__##(__PRETTY_FUNCTION__);
-	#define PROFI_SCOPE(NAME) profi::LocalProfileScope lpss_##__LINE__##(NAME);
+	#define PROFI_FUNC profi::LocalProfileScope PROFI_CONCAT2(lps_, __LINE__)(__PRETTY_FUNCTION__);
+	#define PROFI_SCOPE(NAME) profi::LocalProfileScope PROFI_CONCAT2(lpss_, __LINE__)(NAME);
 	#define PROFI_NAME_THREAD(NAME) profi::NameThread(NAME);
 
 #else
@@ -55,6 +58,6 @@ namespace profi {
 	PROFI_EXPORT IReport* GetReportJSON();
 	PROFI_EXPORT unsigned GetTimerBaseLine();
 	PROFI_EXPORT void NameThread(const char* name);
-
+	
 	PROFI_EXPORT void ResetProfiles();
 }
