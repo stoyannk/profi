@@ -3,12 +3,11 @@
 // This software is governed by a permissive BSD-style license. See LICENSE.
 #pragma once
 #include <profi_decls.h>
+#include <IAllocator.h>
+#include <LocalProfileScope.h>
+#include <Reports.h>
 
 #ifdef PROFI_ENABLE
-	#include <IAllocator.h>
-	#include <LocalProfileScope.h>
-	#include <Reports.h>
-
 	#ifdef _MSC_VER
 		#define __PRETTY_FUNCTION__ __FUNCSIG__
 	#endif
