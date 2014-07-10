@@ -43,6 +43,7 @@ void thread_run2() {
 	PROFI_NAME_THREAD("Worker #2")
 	PROFI_FUNC
 	SIMUL_SLEEP(500)
+
 	recurse(2);
 }
 

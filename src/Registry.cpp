@@ -148,7 +148,9 @@ void Registry::Deinitialize() {
 }
 
 Registry::Registry(IAllocator* allocator)
-{}
+{
+	m_IsActive.store(true);
+}
 
 Registry::~Registry() {
 	std::for_each(m_ProfiledThreads.begin(), m_ProfiledThreads.end(), [](ProfileThread* tlsData){
@@ -304,7 +306,7 @@ const void* Registry::JSONReport::Data()
 
 unsigned Registry::JSONReport::Size()
 {
-	return m_Data.size();
+	return unsigned(m_Data.size());
 }
 
 pstring& Registry::JSONReport::GetString()
@@ -334,6 +336,14 @@ void NameThread(const char* name) {
 
 void ResetProfiles() {
 	Registry::Get()->ResetProfiles();
+}
+
+void PauseProfiling() {
+	Registry::Get()->PauseProfiling();
+}
+
+void ResumeProfiling() {
+	Registry::Get()->ResumeProfiling();
 }
 
 }

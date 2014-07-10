@@ -21,7 +21,7 @@ LocalProfileScope::LocalProfileScope(const char* name)
 
 LocalProfileScope::~LocalProfileScope()
 {
-	m_MyThread->ExitScope(m_MyThread->GetTimer().Now() - m_StartTime, m_Parent);
+	m_MyThread->ExitScope(Registry::Get()->IsActive() ? m_MyThread->GetTimer().Now() - m_StartTime : 0, m_Parent);
 }
   
 }

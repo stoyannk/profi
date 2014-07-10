@@ -60,7 +60,7 @@ namespace profi {
 		if(s_BaseLine == UNKNOWN_BASELINE)
 		{
 			//Taken Directly from Intel's docs
-#ifdef PROFI_TIMING_FLUSH_CPU
+#if defined(PROFI_TIMING_FLUSH_CPU) && !defined(PROFI_X64)
 			unsigned base, base_extra=0;
 			unsigned cycles_low, cycles_high;
 			// The following tests run the basic cycle counter to find

@@ -6,7 +6,20 @@ project "profi"
 	includedirs { '../include/' }
 	includedirs { '../src/' }
 	dofile 'third_party.lua'
+	
+	configuration 'x32'
+		defines {
+			'PROFI_X32'
+		}
+		targetdir "../bin32"
 		
+	configuration 'x64'
+		defines {
+			'PROFI_X64'
+		}
+		targetdir "../bin64"
+	configuration '*'
+	
 	filesInProj = {
 		"*.h",
 		"*.cpp",
@@ -25,8 +38,6 @@ project "profi"
 	
 	flags { 'NoRTTI', 'EnableSSE2' }
 
-	targetdir "../bin"
-	
 	configuration "Debug"
          defines { "DEBUG", "PROFI_BUILD" }
          flags { "Symbols" }

@@ -5,6 +5,18 @@ project 'profi_tests'
 
 	dofile '../../src/third_party.lua'	
 	
+	configuration 'x32'
+		links { '../../bin32/profi' }
+		libdirs { "../../bin32/" }
+		targetdir "../../bin32"
+		
+	configuration 'x64'
+		links { '../../bin64/profi' }
+		libdirs { "../../bin64/" }
+		targetdir "../../bin64"
+		
+	configuration '*'
+	
 	files { '**.h', '**.cpp' }
 	
 	vpaths {
@@ -20,11 +32,9 @@ project 'profi_tests'
 	configuration "Debug"
          defines { "DEBUG;_VARIADIC_MAX=10" }
          flags { "Symbols" }
-		 targetdir "../../bin"
-		 links { '../../bin/profi', '../../bin/gtestd', '../../bin/gtest_main-mdd' }
+		 links { '../../bin/gtestd', '../../bin/gtest_main-mdd' }
  
     configuration "Release"
          defines { "NDEBUG;_VARIADIC_MAX=10" }
          flags { "Optimize" }
-		 targetdir "../../bin"
-		 links { '../../bin/profi', '../../bin/gtest', '../../bin/gtest_main-md' }
+		 links { '../../bin/gtest', '../../bin/gtest_main-md' }

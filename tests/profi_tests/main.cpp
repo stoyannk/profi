@@ -7,6 +7,7 @@
 #include <memory>
 
 #include <../src/precompiled.h>
+#define PROFI_ENABLE
 #include <profi.h>
 #include <STLAllocator.h>
 #include <ProfileScope.h>

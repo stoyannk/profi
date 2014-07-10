@@ -81,7 +81,7 @@ bool HashMap::Insert(ProfileScope* scope)
 void HashMap::Rehash()
 {
 	storage_t newStorage(m_Storage.size() * 2);
-	unsigned newCounter = 0;
+	size_t newCounter = 0;
 	std::for_each(m_Storage.cbegin(), m_Storage.cend(), [&newStorage, &newCounter, this](ProfileScope* scope) {
 		if(scope)
 			InsertInternal(scope, newStorage, newCounter);

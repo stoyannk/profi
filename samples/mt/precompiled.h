@@ -7,4 +7,5 @@
 #include <chrono>
 #include <thread>
 #include <atomic>
+#define PROFI_ENABLE
 #include <profi.h>

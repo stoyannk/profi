@@ -44,7 +44,7 @@ private:
 	CountMallocPolicy(const CountMallocPolicy&);
 	CountMallocPolicy& operator=(const CountMallocPolicy&);
 
-	unsigned m_Allocated;
+	size_t m_Allocated;
 };
 
 class NoCountPolicy

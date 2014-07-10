@@ -6,4 +6,5 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#define PROFI_ENABLE
 #include <profi.h>

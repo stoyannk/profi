@@ -67,6 +67,21 @@ public:
 	void ResetProfiles();
 	IReport* DumpDataJSON();
 
+	void PauseProfiling()
+	{
+		m_IsActive = true;
+	}
+
+	void ResumeProfiling()
+	{
+		m_IsActive = false;
+	}
+
+	bool IsActive() const
+	{
+		return m_IsActive;
+	}
+
 	static thread_local const char* ThreadNames;
 
 private:
@@ -82,6 +97,8 @@ private:
 	ProfileNamesList m_ThreadNames;
 
 	static thread_local ProfileThread* m_TLSProfiles;
+
+	std::atomic_bool m_IsActive;
 
 private:
 	class JSONReport : public IReport
